@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block breadcrumb %}Traffic Monitor & Simulator{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.5rem;">
+    <h1 style="font-size: 1.7rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em;">Microsegmentation Traffic Monitor</h1>
+    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+        Real-time egress/ingress policy enforcement and interactive communication simulator.
+    </p>
+</div>
+
+<!-- Section 1: Visual Communication Flow Monitor -->
+<div class="cyber-card" style="margin-bottom: 2rem;">
+    <div class="card-header-cyber">
+        <div class="card-title-cyber">
+            <span>⚡</span>
+            <span>Live Communication Flow Monitor</span>
+        </div>
+        <span class="badge-cyber badge-starting">ACTIVE MONITORING</span>
+    </div>
+    <div class="card-body-cyber">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+            Animated packet transmission traces across microsegmented zones. Requests blocked by the Ambiguity Window trigger visual circuit breaker denial.
+        </p>
+
+        <!-- Visual Flow Stream -->
+        <div id="trafficFlowStream" style="display: flex; flex-direction: column; gap: 1rem;">
+            <!-- Flow Item 1 -->
+            <div class="flow-row-cyber denied">
+                <div class="flow-workload-node">
+                    <span class="pulse-dot amber"></span>
+                    <strong>W-NEW</strong>
+                    <span class="badge-cyber badge-ambiguous" style="font-size: 0.65rem; padding: 0.1rem 0.4rem;">AMBIGUOUS</span>
+                </div>
+                <div class="flow-line-track">
+                    <div class="flow-beam-denied"></div>
+                    <div class="flow-status-pill badge-cyber badge-denied">🔒 BLOCKED</div>
+                </div>
+                <div class="flow-dest-node">
+                    <strong>DATABASE</strong>
+                    <span style="font-size: 0.72rem; color: var(--text-muted);">Internal Storage</span>
+                </div>
+            </div>
+
+            <!-- Flow Item 2 -->
+            <div class="flow-row-cyber denied">
+                <div class="flow-workload-node">
+                    <span class="pulse-dot amber"></span>
+                    <strong>W-NEW</strong>
+                    <span class="badge-cyber badge-ambiguous" style="font-size: 0.65rem; padding: 0.1rem 0.4rem;">AMBIGUOUS</span>
+                </div>
+                <div class="flow-line-track">
+                    <div class="flow-beam-denied"></div>
+                    <div class="flow-status-pill badge-cyber badge-denied">🔒 BLOCKED</div>
+                </div>
+                <div class="flow-dest-node">
+                    <strong>PAYMENT API</strong>
+                    <span style="font-size: 0.72rem; color: var(--text-muted);">Payment Gateway</span>
+                </div>
+            </div>
+
+            <!-- Flow Item 3 -->
+            <div class="flow-row-cyber allowed">
+                <div class="flow-workload-node">
+                    <span class="pulse-dot"></span>
+                    <strong>W-OLD</strong>
+                    <span class="badge-cyber badge-confirmed" style="font-size: 0.65rem; padding: 0.1rem 0.4rem;">CONFIRMED</span>
+                </div>
+                <div class="flow-line-track">
+                    <div class="flow-beam-allowed"></div>
+                    <div class="flow-status-pill badge-cyber badge-allowed">✓ ALLOWED</div>
+                </div>
+                <div class="flow-dest-node">
+                    <strong>PAYMENT API</strong>
+                    <span style="font-size: 0.72rem; color: var(--text-muted);">Payment Gateway</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 2: Interactive Communication Simulator & Decision Engine -->
+<div class="dashboard-split-grid">
+    <!-- Simulator Control Panel -->
+    <div class="cyber-card">
+        <div class="card-header-cyber">
+            <div class="card-title-cyber">
+                <span>🛰</span>
+                <span>Simulate Traffic Request</span>
+            </div>
+        </div>
+        <div class="card-body-cyber">
+            <div class="form-group-cyber">
+                <label class="form-label-cyber">Source Workload</label>
+                <select id="simWorkloadSelect" class="form-control-cyber"></select>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem;">
+                    If identity is STARTING or AMBIGUOUS, Fail-Closed Zero Trust unconditionally denies traffic.
+                </div>
+            </div>
+
+            <div class="form-group-cyber">
+                <label class="form-label-cyber">Destination Service</label>
+                <select id="simDestSelect" class="form-control-cyber"></select>
+            </div>
+
+            <div class="form-group-cyber">
+                <label class="form-label-cyber">Or Custom Destination (Test Unknown Service)</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="customDestInput" class="form-control-cyber" placeholder="e.g. unknown-external-db">
+                    <button class="btn-cyber btn-cyber-secondary btn-sm" onclick="useCustomDest()">Use</button>
+                </div>
+            </div>
+
+            <button class="btn-cyber btn-cyber-primary" id="btnSimulateTraffic" style="width: 100%; padding: 0.8rem; font-size: 0.95rem;">
+                ⚡ Execute Simulation Request
+            </button>
+
+            <!-- Quick Security Presets -->
+            <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-card); padding-top: 1rem;">
+                <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
+                    Security Invariant Presets
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                    <button class="btn-cyber btn-cyber-secondary btn-sm" style="justify-content: flex-start; text-align: left;" onclick="setPreset('W-NEW', 'database')">
+                        Preset 1: W-NEW ➔ database (Expect: 🔒 DENY IDENTITY_AMBIGUOUS)
+                    </button>
+                    <button class="btn-cyber btn-cyber-secondary btn-sm" style="justify-content: flex-start; text-align: left;" onclick="setPreset('W-NEW', 'payment-api')">
+                        Preset 2: W-NEW ➔ payment-api (Expect: 🔒 DENY IDENTITY_AMBIGUOUS)
+                    </button>
+                    <button class="btn-cyber btn-cyber-secondary btn-sm" style="justify-content: flex-start; text-align: left;" onclick="setPreset('W-OLD', 'payment-api')">
+                        Preset 3: W-OLD ➔ payment-api (Expect: ✓ ALLOW POLICY_ALLOW)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Decision Breakdown Display -->
+    <div class="cyber-card">
+        <div class="card-header-cyber">
+            <div class="card-title-cyber">
+                <span>🛡</span>
+                <span>Security Decision Breakdown</span>
+            </div>
+            <span class="badge-cyber badge-starting" id="decisionLiveBadge">LIVE INSPECTION</span>
+        </div>
+        <div class="card-body-cyber">
+            <!-- Active Packet Animated Conduit -->
+            <div class="active-packet-conduit" id="simPacketConduit" style="display: none;">
+                <div class="conduit-track">
+                    <div class="conduit-node source" id="conduitSource">SOURCE</div>
+                    <div class="conduit-line" id="conduitLine">
+                        <div class="conduit-barrier" id="conduitBarrier" title="Zero-Trust Policy Gate"></div>
+                        <div class="conduit-packet" id="conduitPacket"></div>
+                        <div class="conduit-shockwave" id="conduitShockwave"></div>
+                    </div>
+                    <div class="conduit-node dest" id="conduitDest">DESTINATION</div>
+                </div>
+            </div>
+
+            <div id="simulationResult">
+                <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 1.75rem; text-align: center;">
+                    <div style="font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--accent-cyan);">◈</div>
+                    <h3 style="font-size: 1.1rem; color: #FFFFFF; margin-bottom: 0.4rem;">Awaiting Traffic Simulation</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 320px; margin: 0 auto;">
+                        Select a source workload and destination endpoint to inspect real-time microsegmentation policy evaluation.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Flow Monitor Styling */
+.flow-row-cyber {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px;
+    align-items: center;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.flow-workload-node, .flow-dest-node {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+}
+
+.flow-dest-node {
+    justify-content: flex-end;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.1rem;
+}
+
+.flow-line-track {
+    position: relative;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flow-beam-denied {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 60%;
+    background: linear-gradient(90deg, var(--status-ambiguous), var(--status-violation));
+    box-shadow: 0 0 10px var(--status-violation);
+}
+
+.flow-beam-allowed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, var(--status-confirmed), var(--accent-cyan));
+    box-shadow: 0 0 10px var(--status-confirmed);
+}
+
+.flow-status-pill {
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+</style>
+{% endblock %}

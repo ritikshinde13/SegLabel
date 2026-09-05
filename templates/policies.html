@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block breadcrumb %}Microsegmentation Policy Matrix{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 style="font-size: 1.7rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em;">Microsegmentation Policy Matrix</h1>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+            2D Access Control Matrix enforced strictly for attested workloads with <strong>CONFIRMED</strong> identity.
+        </p>
+    </div>
+    <div>
+        <button class="btn-cyber btn-cyber-primary" onclick="openAddPolicyModal()">
+            + Add Policy Rule
+        </button>
+    </div>
+</div>
+
+<!-- Section 1: Interactive 2D Policy Matrix Grid -->
+<div class="cyber-card" style="margin-bottom: 2rem;">
+    <div class="card-header-cyber">
+        <div class="card-title-cyber">
+            <span>▦</span>
+            <span>Interactive 2D Policy Matrix (Source Roles × Destination Endpoints)</span>
+        </div>
+        <span class="badge-cyber badge-confirmed">ACTIVE ACCESS MATRIX</span>
+    </div>
+    <div class="card-body-cyber">
+        <div class="matrix-container" style="padding: 0; margin-bottom: 0; background: transparent; border: none;">
+            <table class="matrix-table" id="interactivePolicyMatrix">
+                <!-- Dynamically generated 2D grid -->
+                <thead>
+                    <tr>
+                        <th class="matrix-header-cell" style="text-align: left;">Source Role \ Destination</th>
+                        <th class="matrix-header-cell">DATABASE</th>
+                        <th class="matrix-header-cell">PAYMENT API</th>
+                        <th class="matrix-header-cell">STUDENT API</th>
+                        <th class="matrix-header-cell">REPORTING SVC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="matrix-row-label">PAYMENT</td>
+                        <td class="matrix-cell allow" onclick="inspectMatrixRule('payment', 'database', 'ALLOW')">✓</td>
+                        <td class="matrix-cell allow" onclick="inspectMatrixRule('payment', 'payment-api', 'ALLOW')">✓</td>
+                        <td class="matrix-cell deny" onclick="inspectMatrixRule('payment', 'student-api', 'DENY')">✕</td>
+                        <td class="matrix-cell deny" onclick="inspectMatrixRule('payment', 'reporting-service', 'DENY')">✕</td>
+                    </tr>
+                    <tr>
+                        <td class="matrix-row-label">STUDENT</td>
+                        <td class="matrix-cell deny" onclick="inspectMatrixRule('student', 'database', 'DENY')">✕</td>
+                        <td class="matrix-cell deny" onclick="inspectMatrixRule('student', 'payment-api', 'DENY')">✕</td>
+                        <td class="matrix-cell allow" onclick="inspectMatrixRule('student', 'student-api', 'ALLOW')">✓</td>
+                        <td class="matrix-cell deny" onclick="inspectMatrixRule('student', 'reporting-service', 'DENY')">✕</td>
+                    </tr>
+                    <tr>
+                        <td class="matrix-row-label">ADMIN</td>
+                        <td class="matrix-cell allow" onclick="inspectMatrixRule('admin', 'database', 'ALLOW')">✓</td>
+                        <td class="matrix-cell allow" onclick="inspectMatrixRule('admin', 'payment-api', 'ALLOW')">✓</td>
+                        <td class="matrix-cell allow" onclick="inspectMatrixRule('admin', 'student-api', 'ALLOW')">✓</td>
+                        <td class="matrix-cell allow" onclick="inspectMatrixRule('admin', 'reporting-service', 'ALLOW')">✓</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 1rem; display: flex; gap: 1.5rem;">
+            <span><strong style="color: var(--status-confirmed);">✓ ALLOW</strong>: Permitted when identity is confirmed</span>
+            <span><strong style="color: var(--status-violation);">✕ DENY</strong>: Default or explicit deny</span>
+            <span>Hover / click any matrix cell to inspect rule specification</span>
+        </div>
+    </div>
+</div>
+
+<!-- Section 2: Configured Rules Table -->
+<div class="cyber-card">
+    <div class="card-header-cyber">
+        <div class="card-title-cyber">
+            <span>📜</span>
+            <span>Configured Policy Rules Registry</span>
+        </div>
+        <input type="text" class="form-control-cyber" style="width: 220px; padding: 0.35rem 0.75rem; font-size: 0.8rem;" placeholder="🔍 Filter rules..." oninput="filterPoliciesTable(this.value)">
+    </div>
+    <div class="card-body-cyber" style="padding: 0;">
+        <div class="table-container-cyber">
+            <table class="data-table-cyber">
+                <thead>
+                    <tr>
+                        <th>Source Identity</th>
+                        <th>Destination Service</th>
+                        <th>Policy Action</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="policiesTableBody">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Policy Modal -->
+<div class="modal-backdrop-cyber" id="addPolicyModal">
+    <div class="modal-dialog-cyber">
+        <div class="modal-header-cyber">
+            <div class="modal-title-cyber">
+                <span>+</span>
+                <span>Add / Update Microsegmentation Rule</span>
+            </div>
+            <button class="modal-close-cyber" onclick="closeAllModals()">✕</button>
+        </div>
+        <div class="modal-body-cyber">
+            <div class="form-group-cyber">
+                <label class="form-label-cyber">Source Identity Role</label>
+                <input type="text" id="policySourceInput" class="form-control-cyber" placeholder="e.g. payment, student, admin">
+            </div>
+            <div class="form-group-cyber">
+                <label class="form-label-cyber">Destination Service</label>
+                <input type="text" id="policyDestInput" class="form-control-cyber" placeholder="e.g. database, payment-api">
+            </div>
+            <div class="form-group-cyber">
+                <label class="form-label-cyber">Policy Action</label>
+                <select id="policyActionInput" class="form-control-cyber">
+                    <option value="ALLOW">ALLOW</option>
+                    <option value="DENY">DENY</option>
+                </select>
+            </div>
+            <div class="form-group-cyber">
+                <label class="form-label-cyber">Rule Description</label>
+                <input type="text" id="policyDescInput" class="form-control-cyber" placeholder="e.g. Grant database read access to payment service">
+            </div>
+        </div>
+        <div class="modal-footer-cyber">
+            <button class="btn-cyber btn-cyber-secondary" onclick="closeAllModals()">Cancel</button>
+            <button class="btn-cyber btn-cyber-primary" id="btnSubmitAddPolicy">Save Policy Rule</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function openAddPolicyModal() {
+    const m = document.getElementById("addPolicyModal");
+    if (m) m.classList.add("open");
+}
+
+function inspectMatrixRule(src, dest, action) {
+    alert(`Policy Matrix Inspection:\n\nSource Identity: ${src}\nDestination: ${dest}\nAction: ${action}\n\nStrictly enforced for confirmed workloads.`);
+}
+
+function filterPoliciesTable(query) {
+    const rows = document.querySelectorAll("#policiesTableBody tr");
+    const q = (query || "").toLowerCase();
+    rows.forEach(r => {
+        r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none";
+    });
+}
+</script>
+{% endblock %}

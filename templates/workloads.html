@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block breadcrumb %}Workloads Fleet{% endblock %}
+
+{% block content %}
+<!-- Fleet Header Bar -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 style="font-size: 1.7rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em;">Workload Fleet Explorer</h1>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+            Inspect managed workloads, monitor active ambiguity windows, and review identity attestations.
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <!-- View Switcher -->
+        <div style="display: flex; background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 3px;">
+            <button class="btn-cyber btn-sm" id="btnViewCards" style="background: rgba(0, 229, 255, 0.15); color: var(--accent-cyan);" onclick="switchFleetView('cards')">
+                ▦ Cards
+            </button>
+            <button class="btn-cyber btn-sm" id="btnViewTable" style="background: transparent; color: var(--text-muted);" onclick="switchFleetView('table')">
+                ▤ Table
+            </button>
+        </div>
+
+        <button class="btn-cyber btn-cyber-primary" onclick="openRegisterModal()">
+            + Register Workload
+        </button>
+    </div>
+</div>
+
+<!-- Filter Pills & Search Bar -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div class="filter-pills-bar" style="margin-bottom: 0;">
+        <button class="filter-pill active" onclick="filterWorkloadFleet('ALL', this)">All Workloads</button>
+        <button class="filter-pill" onclick="filterWorkloadFleet('AMBIGUOUS', this)">⚠ Ambiguous Window</button>
+        <button class="filter-pill" onclick="filterWorkloadFleet('CONFIRMED', this)">✓ Confirmed Fleet</button>
+        <button class="filter-pill" onclick="filterWorkloadFleet('STARTING', this)">⚡ Starting</button>
+    </div>
+    <div style="min-width: 260px;">
+        <input type="text" id="workloadSearchInput" class="form-control-cyber" placeholder="🔍 Search workload ID, name, signal..." oninput="searchWorkloadFleet(this.value)">
+    </div>
+</div>
+
+<!-- View 1: Card Explorer Grid -->
+<div class="workloads-grid-cards" id="workloadCardsGrid">
+    <!-- Populated by JS -->
+    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
+        Loading workload fleet telemetry...
+    </div>
+</div>
+
+<!-- View 2: High-Density Table View (Hidden by default) -->
+<div class="cyber-card" id="workloadTableView" style="display: none;">
+    <div class="card-body-cyber" style="padding: 0;">
+        <div class="table-container-cyber">
+            <table class="data-table-cyber">
+                <thead>
+                    <tr>
+                        <th>Workload ID</th>
+                        <th>Name</th>
+                        <th>Reported Signal</th>
+                        <th>Current Identity</th>
+                        <th>Status</th>
+                        <th>Ambiguity Window</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="workloadsTableBody">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Dedicated Workload Detail Drawer/Modal is in base.html (#workloadDetailModal) -->
+
+<script>
+let currentFleetFilter = 'ALL';
+let currentFleetView = 'cards';
+
+function switchFleetView(mode) {
+    currentFleetView = mode;
+    const cardsEl = document.getElementById("workloadCardsGrid");
+    const tableEl = document.getElementById("workloadTableView");
+    const btnCards = document.getElementById("btnViewCards");
+    const btnTable = document.getElementById("btnViewTable");
+
+    if (mode === 'cards') {
+        cardsEl.style.display = 'grid';
+        tableEl.style.display = 'none';
+        btnCards.style.background = 'rgba(0, 229, 255, 0.15)';
+        btnCards.style.color = 'var(--accent-cyan)';
+        btnTable.style.background = 'transparent';
+        btnTable.style.color = 'var(--text-muted)';
+    } else {
+        cardsEl.style.display = 'none';
+        tableEl.style.display = 'block';
+        btnTable.style.background = 'rgba(0, 229, 255, 0.15)';
+        btnTable.style.color = 'var(--accent-cyan)';
+        btnCards.style.background = 'transparent';
+        btnCards.style.color = 'var(--text-muted)';
+    }
+}
+
+function filterWorkloadFleet(status, btn) {
+    currentFleetFilter = status;
+    document.querySelectorAll(".filter-pills-bar .filter-pill").forEach(p => p.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    loadWorkloadsFleet();
+}
+
+function searchWorkloadFleet(query) {
+    loadWorkloadsFleet(query);
+}
+
+function openRegisterModal() {
+    const modal = document.getElementById("registerWorkloadModal");
+    if (modal) modal.classList.add("open");
+}
+</script>
+{% endblock %}

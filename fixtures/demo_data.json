@@ -1,0 +1,32 @@
+{
+  "destinations": [
+    { "name": "database", "description": "Core Relational Database Store", "category": "data" },
+    { "name": "payment-api", "description": "Payment Processing Service Endpoint", "category": "service" },
+    { "name": "student-api", "description": "Student Records & Course Service Endpoint", "category": "service" },
+    { "name": "admin-api", "description": "Privileged Administrative Gateway", "category": "service" },
+    { "name": "analytics-service", "description": "Telemetry & Analytics Ingestion", "category": "service" }
+  ],
+  "policies": [
+    { "source_identity": "payment", "destination": "database", "action": "ALLOW", "description": "Payment worker full access to database" },
+    { "source_identity": "payment", "destination": "payment-api", "action": "ALLOW", "description": "Payment worker access to payment processing API" },
+    { "source_identity": "student", "destination": "database", "action": "DENY", "description": "Student workload strictly forbidden from direct database access" },
+    { "source_identity": "student", "destination": "student-api", "action": "ALLOW", "description": "Student workload permitted to access student API" },
+    { "source_identity": "admin", "destination": "database", "action": "ALLOW", "description": "Admin service unrestricted database access" },
+    { "source_identity": "admin", "destination": "admin-api", "action": "ALLOW", "description": "Admin service access to admin gateway" }
+  ],
+  "sample_scenarios": [
+    {
+      "name": "Identity Reuse Attack Scenario",
+      "steps": [
+        "1. Start W-OLD with identity 'payment'",
+        "2. Start W-NEW with claimed signal 'payment' (Collision detected -> AMBIGUOUS)",
+        "3. W-NEW tries database -> DENIED (IDENTITY_AMBIGUOUS)",
+        "4. W-NEW tries payment-api -> DENIED (IDENTITY_AMBIGUOUS)",
+        "5. Attestation confirms W-NEW true identity is 'student'",
+        "6. W-NEW tries database -> DENIED (POLICY_DENY)",
+        "7. W-NEW tries student-api -> ALLOWED (POLICY_ALLOW)",
+        "8. Retroactive verification -> PASS"
+      ]
+    }
+  ]
+}

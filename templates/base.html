@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SegLabel — Cybersecurity SaaS Command Center{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡</text></svg>">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Modern Cyber SaaS Navigation Sidebar -->
+        <aside class="cyber-sidebar" id="cyberSidebar">
+            <a href="/" class="sidebar-brand">
+                <div class="brand-emblem">◈</div>
+                <div class="brand-info">
+                    <span class="brand-title">SEGLABEL</span>
+                    <span class="brand-subtitle">Security Control Plane</span>
+                </div>
+            </a>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Operations</div>
+                <a href="/" class="sidebar-link {% if request.path == '/' %}active{% endif %}" id="navCommandCenter">
+                    <span class="nav-icon">◉</span>
+                    <span>Command Center</span>
+                </a>
+                <a href="/workloads" class="sidebar-link {% if request.path == '/workloads' %}active{% endif %}" id="navWorkloads">
+                    <span class="nav-icon">◇</span>
+                    <span>Workloads Fleet</span>
+                </a>
+                <a href="/events" class="sidebar-link {% if request.path == '/events' %}active{% endif %}" id="navEvents">
+                    <span class="nav-icon">◇</span>
+                    <span>Identity Events</span>
+                </a>
+                <a href="/simulator" class="sidebar-link {% if request.path == '/simulator' %}active{% endif %}" id="navSimulator">
+                    <span class="nav-icon">◇</span>
+                    <span>Traffic Monitor</span>
+                </a>
+
+                <div class="nav-section-title" style="margin-top: 1rem;">Governance & Verification</div>
+                <a href="/verification" class="sidebar-link {% if request.path == '/verification' %}active{% endif %}" id="navVerification">
+                    <span class="nav-icon">◇</span>
+                    <span>Verification</span>
+                </a>
+                <a href="/policies" class="sidebar-link {% if request.path == '/policies' %}active{% endif %}" id="navPolicies">
+                    <span class="nav-icon">◇</span>
+                    <span>Policy Matrix</span>
+                </a>
+                <a href="/audit" class="sidebar-link {% if request.path == '/audit' %}active{% endif %}" id="navAudit">
+                    <span class="nav-icon">◇</span>
+                    <span>Audit Logs</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="system-status-box">
+                    <div class="system-status-header">
+                        <span class="status-label">System Status</span>
+                        <div class="status-indicator-live">
+                            <span class="pulse-dot"></span>
+                            <span>Online</span>
+                        </div>
+                    </div>
+                    <div class="status-subtext">
+                        Engine Operational<br>
+                        <span style="color: var(--accent-cyan);">Fail-Closed Policy Active</span>
+                    </div>
+                    <div style="margin-top: 0.75rem;">
+                        <button class="btn-cyber btn-cyber-secondary btn-sm" id="btnResetSystem" style="width: 100%;" title="Reset all data to seed defaults">
+                            ↺ Reset Database
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="app-main">
+            <!-- Top Command Header Bar -->
+            <header class="cyber-topbar">
+                <div class="topbar-left">
+                    <button class="btn-cyber btn-cyber-secondary btn-sm" id="btnToggleSidebar" style="display: none;" aria-label="Toggle navigation">
+                        ☰
+                    </button>
+                    <div class="page-breadcrumb">
+                        <span>SegLabel</span>
+                        <span>/</span>
+                        <span class="current">{% block breadcrumb %}Security Control Plane{% endblock %}</span>
+                    </div>
+                    <div class="topbar-live-badge">
+                        <span class="pulse-dot"></span>
+                        <span>SECURITY ENGINE ONLINE</span>
+                    </div>
+                    <div id="topbarAmbiguityAlert" class="badge-cyber badge-ambiguous" style="display: none;">
+                        ⚠ <span id="topbarAmbiguousCount">0</span> AMBIGUOUS WORKLOAD(S)
+                    </div>
+                </div>
+
+                <div class="topbar-actions">
+                    <button class="btn-cyber btn-cyber-demo btn-run-demo" title="Execute automated 10-step security validation scenario">
+                        ▶ Run Security Demo
+                    </button>
+                    
+                    <!-- Authenticated Operator Info & Logout -->
+                    <div class="user-session-capsule">
+                        <div class="user-session-info">
+                            <span class="user-role-tag">ADMIN</span>
+                            <span class="user-session-name">{{ session.get('username', 'Operator') }}</span>
+                            <span class="user-status-dot" title="Authenticated Session"></span>
+                        </div>
+                        <form action="/logout" method="POST" style="display: inline; margin: 0;">
+                            <button type="submit" class="btn-cyber btn-cyber-secondary btn-sm btn-logout" title="Terminate Secure Session">
+                                ⎋ Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Viewport -->
+            <main class="page-content">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Cinematic 10-Scene Security Demo Modal -->
+    <div class="modal-backdrop-cyber" id="demoModal">
+        <div class="modal-dialog-cyber demo-modal-dialog">
+            <div class="modal-header-cyber">
+                <div class="modal-title-cyber">
+                    <span>🛡</span>
+                    <span>Cinematic Security Demo — Identity Ambiguity Lifecycle</span>
+                </div>
+                <button class="modal-close-cyber" onclick="closeAllModals()">✕</button>
+            </div>
+            <div class="modal-body-cyber">
+                <!-- Scene Display Box -->
+                <div class="demo-scene-display" id="demoSceneDisplay">
+                    <div class="demo-scene-badge" id="demoSceneBadge">SCENE 1 / 10</div>
+                    <div class="demo-scene-title" id="demoSceneTitle">WORKLOAD STARTING</div>
+                    <div class="demo-scene-desc" id="demoSceneDesc">
+                        Initializing new workload W-NEW in microsegmentation cluster...
+                    </div>
+                    <div id="demoSceneStatusBadge" style="margin-top: 1rem;">
+                        <span class="badge-cyber badge-starting">⚡ STARTING</span>
+                    </div>
+                </div>
+
+                <!-- Stepper Progress Dots & Controls -->
+                <div class="demo-controls-bar">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <button class="btn-cyber btn-cyber-secondary btn-sm" id="demoBtnPrev" onclick="demoPrevScene()">◀ Prev</button>
+                        <button class="btn-cyber btn-cyber-primary btn-sm" id="demoBtnPlayPause" onclick="demoTogglePlay()">⏸ Pause</button>
+                        <button class="btn-cyber btn-cyber-secondary btn-sm" id="demoBtnNext" onclick="demoNextScene()">Next ▶</button>
+                    </div>
+
+                    <!-- 10 Dots -->
+                    <div class="demo-stepper-dots" id="demoStepperDots">
+                        <span class="demo-dot active" data-step="1" onclick="demoGoToScene(1)"></span>
+                        <span class="demo-dot" data-step="2" onclick="demoGoToScene(2)"></span>
+                        <span class="demo-dot" data-step="3" onclick="demoGoToScene(3)"></span>
+                        <span class="demo-dot" data-step="4" onclick="demoGoToScene(4)"></span>
+                        <span class="demo-dot" data-step="5" onclick="demoGoToScene(5)"></span>
+                        <span class="demo-dot" data-step="6" onclick="demoGoToScene(6)"></span>
+                        <span class="demo-dot" data-step="7" onclick="demoGoToScene(7)"></span>
+                        <span class="demo-dot" data-step="8" onclick="demoGoToScene(8)"></span>
+                        <span class="demo-dot" data-step="9" onclick="demoGoToScene(9)"></span>
+                        <span class="demo-dot" data-step="10" onclick="demoGoToScene(10)"></span>
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn-cyber btn-cyber-secondary btn-sm" onclick="demoReplay()">↺ Replay</button>
+                        <button class="btn-cyber btn-cyber-secondary btn-sm" onclick="demoSkipToEnd()">⏩ Skip</button>
+                    </div>
+                </div>
+
+                <!-- Live Terminal Feed -->
+                <div>
+                    <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.45rem; letter-spacing: 0.08em;">
+                        Security Verifier Telemetry Terminal
+                    </div>
+                    <div class="terminal-box-cyber" id="demoTerminal">Initializing microsegmentation verification engine...</div>
+                </div>
+            </div>
+            <div class="modal-footer-cyber">
+                <a href="/audit" class="btn-cyber btn-cyber-secondary btn-sm">View Audit Trail →</a>
+                <button class="btn-cyber btn-cyber-primary btn-sm" onclick="closeAllModals()">Close Demo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Identity Attestation Modal -->
+    <div class="modal-backdrop-cyber" id="confirmModal">
+        <div class="modal-dialog-cyber">
+            <div class="modal-header-cyber">
+                <div class="modal-title-cyber">
+                    <span>🔐</span>
+                    <span>Confirm Workload Identity Attestation</span>
+                </div>
+                <button class="modal-close-cyber" onclick="closeAllModals()">✕</button>
+            </div>
+            <div class="modal-body-cyber">
+                <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1.25rem;">
+                    Cryptographically confirm the true identity for this workload. Once attested, the ambiguity window is closed and standard policy evaluation takes effect.
+                </p>
+                <div class="form-group-cyber">
+                    <label class="form-label-cyber">Target Workload ID</label>
+                    <input type="text" id="confirmWorkloadId" class="form-control-cyber" readonly style="opacity: 0.8;">
+                </div>
+                <div class="form-group-cyber">
+                    <label class="form-label-cyber">Confirmed Attested Identity</label>
+                    <input type="text" id="confirmedIdentityInput" class="form-control-cyber" placeholder="e.g. student, payment, admin">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">
+                        Note: If confirmed identity is 'student', access to 'student-api' will be allowed, while 'database' remains denied.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer-cyber">
+                <button class="btn-cyber btn-cyber-secondary" onclick="closeAllModals()">Cancel</button>
+                <button class="btn-cyber btn-cyber-primary" id="btnSubmitConfirmIdentity">Attest & Confirm Identity</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workload Detail & Journey Modal -->
+    <div class="modal-backdrop-cyber" id="workloadDetailModal">
+        <div class="modal-dialog-cyber" style="max-width: 720px;">
+            <div class="modal-header-cyber">
+                <div class="modal-title-cyber" id="detailModalTitle">
+                    <span>●</span>
+                    <span id="detailWorkloadHeader">W-204 | Workload Details</span>
+                </div>
+                <button class="modal-close-cyber" onclick="closeAllModals()">✕</button>
+            </div>
+            <div class="modal-body-cyber">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                    <div>
+                        <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Current Identity State</div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: #FFFFFF;" id="detailCurrentIdentity">payment</div>
+                    </div>
+                    <div id="detailStatusBadge">
+                        <span class="badge-cyber badge-ambiguous">⚠ AMBIGUOUS</span>
+                    </div>
+                </div>
+
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.5rem;">
+                    Identity Journey Timeline
+                </div>
+                <div class="timeline-stepper" id="detailJourneyTimeline">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.5rem;">
+                        Workload Telemetry Logs
+                    </div>
+                    <div class="terminal-box-cyber" id="detailAuditTerminal" style="max-height: 200px;">
+                        No audit logs yet.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer-cyber">
+                <button class="btn-cyber btn-cyber-secondary" onclick="closeAllModals()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Workload Modal -->
+    <div class="modal-backdrop-cyber" id="registerWorkloadModal">
+        <div class="modal-dialog-cyber">
+            <div class="modal-header-cyber">
+                <div class="modal-title-cyber">
+                    <span>+</span>
+                    <span>Register Simulated Workload</span>
+                </div>
+                <button class="modal-close-cyber" onclick="closeAllModals()">✕</button>
+            </div>
+            <div class="modal-body-cyber">
+                <div class="form-group-cyber">
+                    <label class="form-label-cyber">Workload ID</label>
+                    <input type="text" id="newWorkloadId" class="form-control-cyber" placeholder="e.g. W-204">
+                </div>
+                <div class="form-group-cyber">
+                    <label class="form-label-cyber">Workload Name</label>
+                    <input type="text" id="newWorkloadName" class="form-control-cyber" placeholder="e.g. Analytics Worker">
+                </div>
+                <div class="form-group-cyber">
+                    <label class="form-label-cyber">Initial Identity Signal</label>
+                    <input type="text" id="newWorkloadSignal" class="form-control-cyber" placeholder="e.g. payment, student, or admin">
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.4rem;">
+                        If this signal was claimed by an existing workload, collision detection triggers <strong>AMBIGUOUS</strong> status and fail-closed isolation.
+                    </div>
+                </div>
+                <div class="form-group-cyber">
+                    <label class="form-label-cyber">Attestation State (Optional)</label>
+                    <select id="newWorkloadStatus" class="form-control-cyber">
+                        <option value="">Auto-Detect Collision (Recommended)</option>
+                        <option value="CONFIRMED">Pre-Attested (CONFIRMED)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer-cyber">
+                <button class="btn-cyber btn-cyber-secondary" onclick="closeAllModals()">Cancel</button>
+                <button class="btn-cyber btn-cyber-primary" id="btnSubmitRegisterWorkload">Register Workload</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Anime.js High-Performance Motion Engine -->
+    <script src="{{ url_for('static', filename='js/anime.min.js') }}"></script>
+    <!-- Application Controller -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

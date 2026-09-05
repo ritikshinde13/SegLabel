@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block breadcrumb %}Retroactive Security Verification{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 style="font-size: 1.7rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em;">Retroactive Security Verification</h1>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+            Post-attestation cryptographic audit of the ambiguity window [started_at ➔ confirmed_at].
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <button class="btn-cyber btn-cyber-primary" id="btnExecuteVerification">
+            🛡 Run Verification
+        </button>
+        <button class="btn-cyber btn-cyber-danger" id="btnInjectTamper" title="Inject synthetic breach to demonstrate FAIL detection">
+            ⚠ Inject Synthetic Breach (Test FAIL)
+        </button>
+    </div>
+</div>
+
+<!-- Workload Selector Strip -->
+<div class="cyber-card" style="margin-bottom: 2rem; padding: 1.25rem 1.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <label class="form-label-cyber" style="margin-bottom: 0; font-size: 0.8rem;">Select Target Workload:</label>
+            <select id="verifyWorkloadSelect" class="form-control-cyber" style="width: auto; min-width: 240px; font-weight: 600;"></select>
+        </div>
+        <div style="font-size: 0.82rem; color: var(--text-secondary);">
+            Evaluates invariant: <strong style="color: #FFFFFF;">Allowed During Ambiguity == 0</strong> &amp; <strong style="color: #FFFFFF;">Wrong-Identity Access == 0</strong>
+        </div>
+    </div>
+</div>
+
+<!-- Centerpiece Hero: Circular Verification Ring & Metrics -->
+<div class="verification-hero-stage" id="verificationHeroStage">
+    <!-- Circular Animated Gauge -->
+    <div class="gauge-wrapper">
+        <svg class="gauge-svg" viewBox="0 0 200 200">
+            <circle class="gauge-bg-circle" cx="100" cy="100" r="90"></circle>
+            <circle class="gauge-fill-circle" id="gaugeFillCircle" cx="100" cy="100" r="90"></circle>
+        </svg>
+        <div class="gauge-center-content">
+            <div class="gauge-percent" id="gaugePercentText">100%</div>
+            <div class="gauge-verdict" id="gaugeVerdictText">VERIFIED ✓</div>
+        </div>
+    </div>
+
+    <!-- Final Result Banner -->
+    <div class="verdict-banner-cyber" id="verdictBanner">
+        <span>✓</span>
+        <span id="verdictBannerText">VERIFICATION PASSED — No communication was permitted using an unverified identity.</span>
+    </div>
+
+    <!-- 5 Micro-Metric Counters -->
+    <div class="verif-metrics-grid">
+        <div class="verif-mini-card">
+            <div class="val font-mono" id="verifDuration">00:00:05</div>
+            <div class="lbl">Ambiguity Window</div>
+        </div>
+        <div class="verif-mini-card">
+            <div class="val font-mono counter-anim" id="verifTotalInspected">8</div>
+            <div class="lbl">Requests Inspected</div>
+        </div>
+        <div class="verif-mini-card">
+            <div class="val font-mono counter-anim" id="verifAllowedDuringWindow">0</div>
+            <div class="lbl">Allowed In Window</div>
+        </div>
+        <div class="verif-mini-card" id="cardWrongAccess">
+            <div class="val font-mono counter-anim" id="verifWrongIdentityAccess">0</div>
+            <div class="lbl">Wrong-Identity Access</div>
+        </div>
+        <div class="verif-mini-card" id="cardViolations">
+            <div class="val font-mono counter-anim" id="verifViolationsCount">0</div>
+            <div class="lbl">Security Violations</div>
+        </div>
+    </div>
+</div>
+
+<!-- Two-Column Split: Terminal Telemetry + Historical Runs Table -->
+<div class="dashboard-split-grid">
+    <!-- Verifier Terminal Inspector -->
+    <div class="cyber-card">
+        <div class="card-header-cyber">
+            <div class="card-title-cyber">
+                <span>📟</span>
+                <span>Verifier Telemetry Terminal</span>
+            </div>
+        </div>
+        <div class="card-body-cyber">
+            <div class="terminal-box-cyber" id="verificationTerminal" style="min-height: 280px;">
+Select a workload and click "Run Verification" to audit its ambiguity window logs.
+            </div>
+        </div>
+    </div>
+
+    <!-- Historical Verifications Table -->
+    <div class="cyber-card">
+        <div class="card-header-cyber">
+            <div class="card-title-cyber">
+                <span>📜</span>
+                <span>Verification Audit History</span>
+            </div>
+        </div>
+        <div class="card-body-cyber" style="padding: 0;">
+            <div class="table-container-cyber">
+                <table class="data-table-cyber">
+                    <thead>
+                        <tr>
+                            <th>Workload</th>
+                            <th>Result</th>
+                            <th>Inspected</th>
+                            <th>Violations</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="verificationHistoryBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

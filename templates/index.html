@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+
+{% block breadcrumb %}Command Center{% endblock %}
+
+{% block content %}
+<!-- Top Command Banner -->
+<div class="hero-command-banner">
+    <div class="hero-info">
+        <div class="hero-tag">
+            <span>◈</span>
+            <span>Zero Trust Microsegmentation Control Plane</span>
+        </div>
+        <h1 class="hero-title">SEGLABEL CONTROL PLANE</h1>
+        <p class="hero-desc">
+            Autonomous protection against the <strong>Workload Identity Ambiguity Window</strong>. When recycled signals or startup races cause identity collisions, our engine enforces an absolute <em>Fail-Closed Default Deny</em> until cryptographic attestation confirms the true identity.
+        </p>
+        <div class="hero-invariant-strip">
+            <span>🔒 CORE INVARIANT:</span>
+            <span>AMBIGUOUS IDENTITY ➔ ALL EGRESS & INGRESS TRAFFIC DENIED</span>
+        </div>
+    </div>
+    <div class="hero-actions">
+        <button class="btn-cyber btn-cyber-primary btn-run-demo" style="padding: 0.85rem 1.6rem; font-size: 0.95rem;">
+            ▶ Run Security Demo
+        </button>
+        <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
+            Scenario: 10-Scene Ambiguity Validation
+        </div>
+    </div>
+</div>
+
+<!-- 4 Live Security Metrics Modules -->
+<div class="metrics-quad-grid">
+    <!-- Metric 1: Active Workloads -->
+    <div class="metric-module">
+        <div class="metric-header">
+            <span class="metric-label">Active Workloads</span>
+            <span class="metric-trend trend-neutral" id="trendWorkloads">+3.2%</span>
+        </div>
+        <div class="metric-body">
+            <span class="metric-value counter-anim" id="statTotalWorkloads">0</span>
+            <div class="metric-sparkline">
+                <div class="spark-bar" style="height: 45%;"></div>
+                <div class="spark-bar" style="height: 60%;"></div>
+                <div class="spark-bar" style="height: 75%;"></div>
+                <div class="spark-bar" style="height: 55%;"></div>
+                <div class="spark-bar" style="height: 90%;"></div>
+                <div class="spark-bar" style="height: 100%;"></div>
+            </div>
+        </div>
+        <div class="metric-sub">Fleet total in cluster</div>
+    </div>
+
+    <!-- Metric 2: Identity Ambiguities -->
+    <div class="metric-module amber">
+        <div class="metric-header">
+            <span class="metric-label">Identity Ambiguities</span>
+            <span class="metric-trend trend-amber" id="trendAmbiguities">⚠ ATTENTION</span>
+        </div>
+        <div class="metric-body">
+            <span class="metric-value counter-anim" id="statAmbiguousWorkloads" style="color: var(--status-ambiguous);">0</span>
+            <div class="metric-sparkline">
+                <div class="spark-bar" style="height: 20%;"></div>
+                <div class="spark-bar" style="height: 80%;"></div>
+                <div class="spark-bar" style="height: 60%;"></div>
+                <div class="spark-bar" style="height: 100%;"></div>
+                <div class="spark-bar" style="height: 40%;"></div>
+                <div class="spark-bar" style="height: 70%;"></div>
+            </div>
+        </div>
+        <div class="metric-sub">Isolated under Fail-Closed</div>
+    </div>
+
+    <!-- Metric 3: Blocked Requests -->
+    <div class="metric-module red">
+        <div class="metric-header">
+            <span class="metric-label">Blocked Requests</span>
+            <span class="metric-trend trend-red" id="trendBlocked">ZERO TRUST</span>
+        </div>
+        <div class="metric-body">
+            <span class="metric-value counter-anim" id="statDeniedRequests" style="color: var(--status-violation);">0</span>
+            <div class="metric-sparkline">
+                <div class="spark-bar" style="height: 30%;"></div>
+                <div class="spark-bar" style="height: 70%;"></div>
+                <div class="spark-bar" style="height: 90%;"></div>
+                <div class="spark-bar" style="height: 100%;"></div>
+                <div class="spark-bar" style="height: 85%;"></div>
+                <div class="spark-bar" style="height: 95%;"></div>
+            </div>
+        </div>
+        <div class="metric-sub">Denied during ambiguity window</div>
+    </div>
+
+    <!-- Metric 4: Verification Score -->
+    <div class="metric-module green">
+        <div class="metric-header">
+            <span class="metric-label">Verification Score</span>
+            <span class="metric-trend trend-green" id="trendVerif">100% PASS</span>
+        </div>
+        <div class="metric-body">
+            <span class="metric-value counter-anim" id="statVerifScore" style="color: var(--status-confirmed);">100%</span>
+            <div class="metric-sparkline">
+                <div class="spark-bar" style="height: 85%;"></div>
+                <div class="spark-bar" style="height: 90%;"></div>
+                <div class="spark-bar" style="height: 95%;"></div>
+                <div class="spark-bar" style="height: 92%;"></div>
+                <div class="spark-bar" style="height: 98%;"></div>
+                <div class="spark-bar" style="height: 100%;"></div>
+            </div>
+        </div>
+        <div class="metric-sub">0 wrong-identity accesses allowed</div>
+    </div>
+</div>
+
+<!-- Central Hero Animated Security Visualization Component -->
+<div class="hero-visualizer-card" id="heroVisualizerCard">
+    <div class="visualizer-top-bar">
+        <div class="visualizer-title-area">
+            <div class="cyber-radar-beacon">
+                <span class="radar-sweep-ring"></span>
+                <span class="radar-dot"></span>
+            </div>
+            <div>
+                <h2 class="visualizer-title">Live Security Visualization Engine</h2>
+                <div class="visualizer-subtitle">Zero Trust Identity Ambiguity Window & Real-Time Egress Topology</div>
+            </div>
+            <span class="visualizer-badge" id="visStatusBadge">Interactive Graph</span>
+        </div>
+        <div class="visualizer-controls-bar">
+            <div class="vis-control-item">
+                <label class="form-label-cyber" for="visWorkloadSelector" style="margin-bottom: 0; font-size: 0.72rem;">Target Workload:</label>
+                <select id="visWorkloadSelector" class="form-control-cyber" style="padding: 0.35rem 0.75rem; width: auto; font-size: 0.82rem;">
+                    <option value="W-NEW">W-NEW (Ambiguous)</option>
+                    <option value="W-OLD">W-OLD (Confirmed)</option>
+                </select>
+            </div>
+            <!-- Quick Packet & Attestation Simulator Actions -->
+            <div class="vis-actions-group">
+                <button type="button" class="vis-action-btn" id="btnVisSimDb" title="Simulate egress request to Database">
+                    <span class="vis-btn-icon">⚡</span> Test DB
+                </button>
+                <button type="button" class="vis-action-btn" id="btnVisSimApi" title="Simulate egress request to Payment API">
+                    <span class="vis-btn-icon">⚡</span> Test Payment API
+                </button>
+                <button type="button" class="vis-action-btn" id="btnVisSimStudent" title="Simulate egress request to Student API">
+                    <span class="vis-btn-icon">⚡</span> Test Student API
+                </button>
+                <button type="button" class="vis-action-btn vis-btn-confirm" id="btnVisConfirmIdentity" title="Attest identity as student">
+                    <span class="vis-btn-icon">🛡️</span> Attest
+                </button>
+                <button type="button" class="vis-action-btn vis-btn-reset" id="btnVisResetWindow" title="Reset W-NEW to Ambiguous">
+                    <span class="vis-btn-icon">↺</span> Reset W-NEW
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Animated Node Graph Stage with Canvas Dynamics -->
+    <div class="node-graph-stage" id="nodeGraphStage">
+        <!-- High-Performance Interactive Cyber Hologram Canvas -->
+        <canvas class="vis-canvas-overlay" id="visCanvasOverlay"></canvas>
+
+        <!-- SVG Connecting Paths with Animated Particles -->
+        <svg class="graph-svg-overlay" id="graphSvgOverlay" viewBox="0 0 900 320" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="laserCyanGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.9"/>
+                    <stop offset="100%" stop-color="#2563EB" stop-opacity="0.4"/>
+                </linearGradient>
+                <linearGradient id="laserGreenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#10B981" stop-opacity="0.9"/>
+                    <stop offset="100%" stop-color="#059669" stop-opacity="0.4"/>
+                </linearGradient>
+                <linearGradient id="laserRedGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#EF4444" stop-opacity="0.9"/>
+                    <stop offset="100%" stop-color="#991B1B" stop-opacity="0.4"/>
+                </linearGradient>
+                <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+            </defs>
+
+            <!-- Conduit Line 1: Identity Authority -> Monitored Workload -->
+            <path id="pathEngineToWorkload" d="M 450 65 L 450 120" class="flow-path active-amber"></path>
+            
+            <!-- Conduit Line 2: Workload -> Database Target -->
+            <path id="pathWorkloadToDb" d="M 450 185 C 450 220, 180 220, 180 250" class="flow-path blocked-red"></path>
+            
+            <!-- Conduit Line 3: Workload -> Payment API Target -->
+            <path id="pathWorkloadToApi" d="M 450 185 L 450 250" class="flow-path blocked-red"></path>
+
+            <!-- Conduit Line 4: Workload -> Student API Target -->
+            <path id="pathWorkloadToStudent" d="M 450 185 C 450 220, 720 220, 720 250" class="flow-path blocked-red"></path>
+
+            <!-- Animated Packet Energy Spheres -->
+            <circle id="animPacketEngine" r="5" fill="#00E5FF" filter="url(#glowCyan)"></circle>
+            <circle id="animPacketDb" r="5" fill="#EF4444"></circle>
+            <circle id="animPacketApi" r="5" fill="#EF4444"></circle>
+            <circle id="animPacketStudent" r="5" fill="#EF4444"></circle>
+        </svg>
+
+        <!-- Top Node: Cryptographic Identity Authority -->
+        <div class="graph-node node-engine cyber-glass-pod">
+            <div class="node-icon-crest">
+                <span class="icon-pulse">◈</span>
+            </div>
+            <span class="node-title">Identity Authority</span>
+            <span class="node-main">CRYPTOGRAPHIC CA / SPIRE</span>
+            <span class="node-badge node-badge-ca">● ZERO-TRUST ROOT ATTESTOR</span>
+        </div>
+
+        <!-- Center Node: Target Workload Pod with Hologram Perimeter -->
+        <div class="graph-node node-workload cyber-glass-pod" id="graphNodeWorkload">
+            <div class="workload-pod-header">
+                <span class="pod-icon">⬡</span>
+                <span class="node-title" id="visWorkloadSub">Target Workload</span>
+            </div>
+            <span class="node-main" id="visWorkloadId">W-NEW</span>
+            <div class="vis-signal-badge-box">
+                <span class="signal-label">Claimed Signal:</span>
+                <code id="visWorkloadSignal" class="signal-value">payment</code>
+            </div>
+            <span class="node-badge badge-cyber badge-ambiguous" id="visWorkloadStateBadge">⚠ AMBIGUOUS</span>
+            <div class="attestation-meter" id="visAttestationMeter" title="Ambiguity Window Status">
+                <div class="meter-bar" id="visMeterBar"></div>
+            </div>
+        </div>
+
+        <!-- Real-time Packet Intercept Alert Banner on Stage -->
+        <div class="vis-live-intercept-banner" id="visLiveBanner">
+            <span class="banner-icon" id="visBannerIcon">🛡️</span>
+            <span class="banner-text" id="visBannerText">ZERO TRUST AMBIGUITY QUARANTINE ACTIVE — ALL EGRESS TRAFFIC INTERCEPTED</span>
+        </div>
+
+        <!-- Bottom Row: Target Enclaves (Database, Payment API, Student API) -->
+        <div class="graph-targets-row">
+            <!-- Target 1: Database Vault -->
+            <div class="graph-node node-target denied cyber-glass-pod" id="targetNodeDb">
+                <div class="lock-badge" id="lockBadgeDb">🔒</div>
+                <div class="target-type-tag">STORAGE ENCLAVE</div>
+                <span class="node-main" style="font-size: 0.95rem;">DATABASE</span>
+                <span class="node-sub-meta">POSTGRES • 5432</span>
+                <span class="node-badge" id="decisionBadgeDb" style="color: var(--status-violation);">DENY (FAIL-CLOSED)</span>
+            </div>
+
+            <!-- Target 2: Payment API Gateway -->
+            <div class="graph-node node-target denied cyber-glass-pod" id="targetNodeApi">
+                <div class="lock-badge" id="lockBadgeApi">🔒</div>
+                <div class="target-type-tag">FINANCIAL SERVICE</div>
+                <span class="node-main" style="font-size: 0.95rem;" id="targetApiTitle">PAYMENT API</span>
+                <span class="node-sub-meta">HTTPS • 443</span>
+                <span class="node-badge" id="decisionBadgeApi" style="color: var(--status-violation);">DENY (FAIL-CLOSED)</span>
+            </div>
+
+            <!-- Target 3: Student API Gateway -->
+            <div class="graph-node node-target denied cyber-glass-pod" id="targetNodeStudent">
+                <div class="lock-badge" id="lockBadgeStudent">🔒</div>
+                <div class="target-type-tag">WORKER SERVICE</div>
+                <span class="node-main" style="font-size: 0.95rem;" id="targetStudentTitle">STUDENT API</span>
+                <span class="node-sub-meta">HTTPS • 443</span>
+                <span class="node-badge" id="decisionBadgeStudent" style="color: var(--status-violation);">DENY (FAIL-CLOSED)</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upgraded Modern Zero Trust Ambiguity Window Threat Model & Architecture Card -->
+<div class="explainer-banner" id="explainerBanner">
+    <div class="explainer-header">
+        <div class="explainer-badge-chip">
+            <span class="chip-dot"></span>
+            <span>WHY SEGLABEL ELIMINATES THE IDENTITY AMBIGUITY GAP</span>
+        </div>
+        <h3>The Workload Identity Ambiguity Window Explained</h3>
+    </div>
+    
+    <div class="explainer-cards-grid">
+        <!-- Card 1: The Threat Model -->
+        <div class="explainer-box threat-box">
+            <div class="box-header">
+                <span class="box-tag tag-threat">⚠ VULNERABLE ARCHITECTURE (WITHOUT SEGLABEL)</span>
+                <h4 class="box-title">Reused Signal Triggers Catastrophic Breach</h4>
+            </div>
+            <div class="box-visual">
+                <div class="visual-node v-old">
+                    <strong>W-OLD (Payment)</strong>
+                    <span>Valid Owner</span>
+                </div>
+                <div class="visual-arrow arrow-collision">
+                    <span>IP / Token Recycled</span>
+                    <span class="arrow-symb">⮂ Collision</span>
+                </div>
+                <div class="visual-node v-new-danger">
+                    <strong>W-NEW (Unconfirmed)</strong>
+                    <span>Claims 'payment'</span>
+                </div>
+                <div class="visual-arrow arrow-leak">
+                    <span class="leak-badge">PERMISSIVE LEAK!</span>
+                    <span class="arrow-symb">➔ Database Access</span>
+                </div>
+            </div>
+            <p class="box-desc">
+                Naive microsegmentation engines trust initial labels or reused socket IPs during pod bootstrap. An un-attested workload claiming <code>payment</code> instantly inherits database privileges before attestation finishes.
+            </p>
+        </div>
+
+        <!-- Card 2: SegLabel Zero Trust Solution -->
+        <div class="explainer-box solution-box">
+            <div class="box-header">
+                <span class="box-tag tag-solution">✓ SEGLABEL ZERO TRUST ENFORCEMENT</span>
+                <h4 class="box-title">Cryptographic Fail-Closed Quarantine & Verification</h4>
+            </div>
+            <div class="box-visual">
+                <div class="visual-node v-seglabel">
+                    <strong>W-NEW (Startup)</strong>
+                    <span class="badge-amber-sm">AMBIGUOUS</span>
+                </div>
+                <div class="visual-shield">
+                    <span class="shield-icon">🛡️</span>
+                    <span>FAIL-CLOSED BARRIER</span>
+                </div>
+                <div class="visual-node v-confirmed">
+                    <strong>Attestation & Confirm</strong>
+                    <span class="badge-green-sm">True: student</span>
+                </div>
+                <div class="visual-result">
+                    <span class="pass-badge">PASS: 0 BREACHES ✓</span>
+                    <span>Retroactively Verified</span>
+                </div>
+            </div>
+            <p class="box-desc">
+                SegLabel automatically intercepts traffic while status is <strong>AMBIGUOUS</strong>, enforcing fail-closed isolation. Once attestation proves true identity, <strong>Retroactive Verification</strong> audits all attempts to prove zero packet leaks.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Two-Column Split: Live Event Stream + Quick Traffic Simulator -->
+<div class="dashboard-split-grid">
+    <!-- Left Column: Live Security Event Feed -->
+    <div class="cyber-card">
+        <div class="card-header-cyber">
+            <div class="card-title-cyber">
+                <span>⚡</span>
+                <span>LIVE SECURITY EVENTS</span>
+            </div>
+            <a href="/audit" class="btn-cyber btn-cyber-secondary btn-sm">View Full Audit →</a>
+        </div>
+        <div class="card-body-cyber" style="padding: 1rem;">
+            <div class="live-event-feed" id="liveEventStream">
+                <!-- Dynamically populated with slide-in items -->
+                <div class="event-feed-item ambiguous">
+                    <div class="event-time-workload">
+                        <span class="event-timestamp">12:42:08</span>
+                        <span class="event-workload-id">W-NEW</span>
+                    </div>
+                    <div class="event-action-desc">
+                        Identity signal reused from W-OLD. <strong>Collision detected</strong>.
+                    </div>
+                    <div class="event-badge-cell">
+                        <span class="badge-cyber badge-ambiguous">⚠ AMBIGUOUS</span>
+                    </div>
+                </div>
+                <div class="event-feed-item denied">
+                    <div class="event-time-workload">
+                        <span class="event-timestamp">12:42:10</span>
+                        <span class="event-workload-id">W-NEW</span>
+                    </div>
+                    <div class="event-action-desc">
+                        Attempt to <strong>database</strong> blocked. Fail-closed policy active.
+                    </div>
+                    <div class="event-badge-cell">
+                        <span class="badge-cyber badge-denied">🔒 DENIED</span>
+                    </div>
+                </div>
+                <div class="event-feed-item confirmed">
+                    <div class="event-time-workload">
+                        <span class="event-timestamp">12:42:13</span>
+                        <span class="event-workload-id">W-NEW</span>
+                    </div>
+                    <div class="event-action-desc">
+                        Identity confirmed as <strong>student</strong> via attestation token.
+                    </div>
+                    <div class="event-badge-cell">
+                        <span class="badge-cyber badge-confirmed">✓ CONFIRMED</span>
+                    </div>
+                </div>
+                <div class="event-feed-item confirmed">
+                    <div class="event-time-workload">
+                        <span class="event-timestamp">12:42:15</span>
+                        <span class="event-workload-id">W-NEW</span>
+                    </div>
+                    <div class="event-action-desc">
+                        Retroactive verification completed. <strong>0 violations</strong> found.
+                    </div>
+                    <div class="event-badge-cell">
+                        <span class="badge-cyber badge-pass">✓ PASS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Quick Interactive Traffic Simulator -->
+    <div class="cyber-card">
+        <div class="card-header-cyber">
+            <div class="card-title-cyber">
+                <span>🛰</span>
+                <span>Simulate Traffic</span>
+            </div>
+            <a href="/simulator" class="btn-cyber btn-cyber-secondary btn-sm">Full Simulator →</a>
+        </div>
+        <div class="card-body-cyber">
+            <div class="form-group-cyber">
+                <label class="form-label-cyber">Source Workload</label>
+                <select id="simWorkloadSelect" class="form-control-cyber"></select>
+            </div>
+            <div class="form-group-cyber">
+                <label class="form-label-cyber">Destination Service</label>
+                <select id="simDestSelect" class="form-control-cyber"></select>
+            </div>
+            <button class="btn-cyber btn-cyber-primary" id="btnSimulateTraffic" style="width: 100%;">
+                ⚡ Simulate Request
+            </button>
+
+            <!-- Result Box -->
+            <div id="simulationResult" style="margin-top: 1.25rem;">
+                <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+                    Select source and destination to simulate microsegmentation evaluation.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
