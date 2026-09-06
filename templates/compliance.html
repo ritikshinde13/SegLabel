@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}SegLabel — NIST SP 800-207 Zero Trust Posture & Policy Exporter{% endblock %}
+{% block breadcrumb %}Zero Trust & eBPF Governance{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">NIST SP 800-207 Zero Trust Scorecard</h1>
+            <p class="page-description">
+                Continuous compliance metrics, mathematical ambiguity defense posture, and exportable cloud-native policy manifests (Cilium, Kubernetes NetworkPolicy, eBPF Kernel filters).
+            </p>
+        </div>
+        <div>
+            <button class="btn-cyber btn-cyber-primary" id="btnDownloadReport">
+                Download Audit Report (.md)
+            </button>
+        </div>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+        <div class="card-cyber stat-card">
+            <div class="stat-label">Zero Trust Posture Score</div>
+            <div class="stat-value" id="scoreOverall" style="color: var(--accent-blue);">--</div>
+            <div class="stat-subtext" id="maturityLevel">NIST SP 800-207 Evaluation</div>
+        </div>
+        <div class="card-cyber stat-card">
+            <div class="stat-label">Ambiguity Defense Rate</div>
+            <div class="stat-value" id="defenseRate" style="color: var(--status-confirmed);">--</div>
+            <div class="stat-subtext">Fail-Closed Enforcement</div>
+        </div>
+        <div class="card-cyber stat-card">
+            <div class="stat-label">Window Leaks Detected</div>
+            <div class="stat-value" id="windowLeaks" style="color: var(--text-primary);">0</div>
+            <div class="stat-subtext">Zero Tolerance Target</div>
+        </div>
+        <div class="card-cyber stat-card">
+            <div class="stat-label">Mean Attestation (MTTA)</div>
+            <div class="stat-value" id="mttaVal" style="color: var(--accent-purple, #7C3AED);">--</div>
+            <div class="stat-subtext">Average Window Duration</div>
+        </div>
+    </div>
+
+    <!-- NIST SP 800-207 Pillars Breakdown -->
+    <div class="card-cyber" style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1.25rem;">
+            Zero Trust Architecture Pillars Evaluation
+        </h2>
+        <div id="pillarsList" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="text-align: center; color: var(--text-secondary); padding: 1.5rem;">
+                <span class="pulse-dot"></span> Evaluating Zero Trust compliance rules...
+            </div>
+        </div>
+    </div>
+
+    <!-- Cloud-Native Policy Exporter Section -->
+    <div class="card-cyber">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <div>
+                <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">
+                    Cloud-Native Policy & eBPF Exporter
+                </h2>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                    Synchronize SegLabel's Zero Trust segmentation matrix directly into real Kubernetes CNI and Linux kernel hooks.
+                </p>
+            </div>
+            <button class="btn-cyber btn-cyber-secondary btn-sm" id="btnCopyManifest">
+                Copy Active Code
+            </button>
+        </div>
+
+        <!-- Exporter Navigation Tabs -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">
+            <button class="btn-cyber btn-sm btn-tab active" data-tab="cilium">
+                CiliumNetworkPolicy (YAML)
+            </button>
+            <button class="btn-cyber btn-sm btn-tab" data-tab="k8s">
+                K8s NetworkPolicy (YAML)
+            </button>
+            <button class="btn-cyber btn-sm btn-tab" data-tab="ebpf">
+                eBPF sock_ops Filter (C)
+            </button>
+        </div>
+
+        <!-- Code Display Area -->
+        <pre id="codeExportViewer" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1.25rem; font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-blue-deep); overflow-x: auto; max-height: 450px; line-height: 1.5;"></pre>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let activeManifestText = '';
+    const codeViewer = document.getElementById('codeExportViewer');
+    const btnCopy = document.getElementById('btnCopyManifest');
+    const tabs = document.querySelectorAll('.btn-tab');
+
+    // Fetch Scorecard
+    async function loadScorecard() {
+        try {
+            const resp = await fetch('/api/compliance/scorecard');
+            const data = await resp.json();
+
+            document.getElementById('scoreOverall').textContent = `${data.overall_score}%`;
+            document.getElementById('maturityLevel').textContent = data.maturity_level;
+            document.getElementById('defenseRate').textContent = `${data.metrics.ambiguity_defense_rate_pct}%`;
+            document.getElementById('windowLeaks').textContent = data.metrics.window_leaks;
+            document.getElementById('mttaVal').textContent = `${data.metrics.mean_time_to_attestation_seconds}s`;
+
+            if (data.metrics.window_leaks > 0) {
+                document.getElementById('windowLeaks').style.color = 'var(--status-violation)';
+            } else {
+                document.getElementById('windowLeaks').style.color = 'var(--status-confirmed)';
+            }
+
+            // Render pillars
+            const pillarsList = document.getElementById('pillarsList');
+            let pHtml = '';
+            (data.pillars || []).forEach(p => {
+                const badgeClass = p.status === 'COMPLIANT' ? 'badge-active' : 'badge-ambiguous';
+                pHtml += `
+                <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="max-width: 80%;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem;">
+                            <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">${p.pillar}</span>
+                            <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">${p.standard}</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">${p.description}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <span class="badge-cyber ${badgeClass}">${p.status} (${p.score}%)</span>
+                    </div>
+                </div>
+                `;
+            });
+            pillarsList.innerHTML = pHtml;
+        } catch (e) {
+            console.error('Failed to load scorecard', e);
+        }
+    }
+
+    // Load exporter code
+    async function loadExporter(kind) {
+        codeViewer.textContent = 'Loading manifest from policy matrix...';
+        try {
+            const resp = await fetch(`/api/export/${kind}`);
+            const data = await resp.json();
+            activeManifestText = data.manifest || data.code || '';
+            codeViewer.textContent = activeManifestText;
+        } catch (e) {
+            codeViewer.textContent = `Error loading exporter: ${e.message}`;
+        }
+    }
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            loadExporter(tab.getAttribute('data-tab'));
+        });
+    });
+
+    btnCopy.addEventListener('click', () => {
+        if (!activeManifestText) return;
+        navigator.clipboard.writeText(activeManifestText).then(() => {
+            const orig = btnCopy.textContent;
+            btnCopy.textContent = 'Copied to Clipboard!';
+            setTimeout(() => { btnCopy.textContent = orig; }, 2000);
+        });
+    });
+
+    document.getElementById('btnDownloadReport').addEventListener('click', async () => {
+        try {
+            const resp = await fetch('/api/compliance/report');
+            const data = await resp.json();
+            const blob = new Blob([data.report], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `seglabel-nist-sp800-207-audit-${new Date().toISOString().slice(0,10)}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (e) {
+            alert('Failed to generate report: ' + e.message);
+        }
+    });
+
+    loadScorecard();
+    loadExporter('cilium');
+});
+</script>
+{% endblock %}

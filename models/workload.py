@@ -6,6 +6,8 @@ class IdentityStatus(str, Enum):
     STARTING = "STARTING"
     AMBIGUOUS = "AMBIGUOUS"
     CONFIRMED = "CONFIRMED"
+    QUARANTINED = "QUARANTINED"
+    REVOKED = "REVOKED"
 
 @dataclass
 class Workload:

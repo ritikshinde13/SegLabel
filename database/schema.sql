@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS workloads (
     initial_identity_signal TEXT NOT NULL,
     current_identity TEXT NOT NULL,
     confirmed_identity TEXT,
-    status TEXT NOT NULL CHECK(status IN ('STARTING', 'AMBIGUOUS', 'CONFIRMED')),
+    status TEXT NOT NULL CHECK(status IN ('STARTING', 'AMBIGUOUS', 'CONFIRMED', 'QUARANTINED', 'REVOKED')),
     status_reason TEXT,
     started_at TEXT NOT NULL,
     confirmed_at TEXT,

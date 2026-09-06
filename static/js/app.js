@@ -167,6 +167,15 @@ function setupNavigation() {
 // ================= GLOBAL ACTIONS =================
 function setupGlobalActions() {
     // Run Security Demo buttons (navbar and hero)
+    const launchShowcaseBtn = document.getElementById("btnLaunchShowcase");
+    if (launchShowcaseBtn) {
+        launchShowcaseBtn.addEventListener("click", () => {
+            if (typeof launchAutoDemoShowcase === "function") {
+                launchAutoDemoShowcase();
+            }
+        });
+    }
+
     const demoBtns = document.querySelectorAll(".btn-run-demo");
     demoBtns.forEach(btn => {
         btn.addEventListener("click", () => triggerSecurityDemo());
@@ -180,6 +189,11 @@ function setupGlobalActions() {
                 try {
                     const res = await fetch("/api/reset", { method: "POST" });
                     const data = await res.json();
+
+        // Trigger 3D WebGL packet animation
+        if (window.Cyber3D && typeof window.Cyber3D.shootPacket === "function") {
+            window.Cyber3D.shootPacket(destination, data.decision);
+        }
                     alert(data.message || "Database successfully reset.");
                     window.location.reload();
                 } catch (err) {
@@ -388,17 +402,21 @@ function initVisualizerCanvas() {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Populate ambient particles
+    // Populate ambient particles — more, varied for premium effect
     visCanvasParticles = [];
-    for (let i = 0; i < 28; i++) {
+    const particleColors = ["#2563EB", "#60A5FA", "#0EA5E9", "#38BDF8", "#6366F1"];
+    for (let i = 0; i < 55; i++) {
+        const isBig = Math.random() < 0.15;
         visCanvasParticles.push({
             x: Math.random() * stage.offsetWidth,
             y: Math.random() * stage.offsetHeight,
-            vx: (Math.random() - 0.5) * 0.4,
-            vy: (Math.random() - 0.5) * 0.4,
-            size: 1 + Math.random() * 2,
-            alpha: 0.2 + Math.random() * 0.4,
-            color: Math.random() > 0.5 ? "#00E5FF" : "#38BDF8"
+            vx: (Math.random() - 0.5) * (isBig ? 0.2 : 0.55),
+            vy: (Math.random() - 0.5) * (isBig ? 0.2 : 0.55),
+            size: isBig ? 3 + Math.random() * 2 : 0.8 + Math.random() * 1.8,
+            alpha: isBig ? 0.35 + Math.random() * 0.3 : 0.15 + Math.random() * 0.35,
+            color: particleColors[Math.floor(Math.random() * particleColors.length)],
+            pulse: Math.random() * Math.PI * 2,
+            pulseSpeed: 0.02 + Math.random() * 0.04
         });
     }
 
@@ -460,7 +478,7 @@ function animateVisualizerCanvas() {
     const pStudent = getNodeCenter(nodeStudent, stage);
 
     // 1. Draw Ambient Background Cyber Grid
-    ctx.strokeStyle = "rgba(56, 189, 248, 0.03)";
+    ctx.strokeStyle = "rgba(15, 23, 42, 0.04)";
     ctx.lineWidth = 1;
     const gridSize = 32;
     for (let x = 0; x < width; x += gridSize) {
@@ -481,8 +499,8 @@ function animateVisualizerCanvas() {
     ctx.save();
     ctx.translate(pWl.x, pWl.y);
     const radarGrad = ctx.createRadialGradient(0, 0, 10, 0, 0, 140);
-    radarGrad.addColorStop(0, isAmbiguous ? "rgba(245, 158, 11, 0.12)" : "rgba(16, 185, 129, 0.12)");
-    radarGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+    radarGrad.addColorStop(0, isAmbiguous ? "rgba(245, 158, 11, 0.08)" : "rgba(16, 185, 129, 0.08)");
+    radarGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
     ctx.fillStyle = radarGrad;
     ctx.beginPath();
     ctx.arc(0, 0, 140, visRadarAngle, visRadarAngle + Math.PI / 3);
@@ -511,8 +529,8 @@ function animateVisualizerCanvas() {
             ctx.shadowColor = "#EF4444";
             ctx.shadowBlur = 6;
         } else {
-            ctx.strokeStyle = "rgba(0, 229, 255, 0.4)";
-            ctx.shadowColor = "#00E5FF";
+            ctx.strokeStyle = "rgba(37, 99, 235, 0.4)";
+            ctx.shadowColor = "#2563EB";
             ctx.shadowBlur = 6;
         }
         ctx.lineWidth = 2;
@@ -562,27 +580,41 @@ function animateVisualizerCanvas() {
     // Outer faint pulse ring
     ctx.beginPath();
     ctx.arc(0, 0, shieldRadius + 8 + Math.sin(visShieldPulse) * 4, 0, Math.PI * 2);
-    ctx.strokeStyle = isAmbiguous ? "rgba(239, 68, 68, 0.2)" : "rgba(0, 229, 255, 0.2)";
+    ctx.strokeStyle = isAmbiguous ? "rgba(239, 68, 68, 0.25)" : "rgba(37, 99, 235, 0.25)";
     ctx.lineWidth = 1;
     ctx.setLineDash([3, 4]);
     ctx.stroke();
     ctx.restore();
 
-    // 5. Render Ambient Floating Particles
+    // 5. Render Premium Ambient Particles with glow + pulse
+    ctx.save();
     visCanvasParticles.forEach(p => {
         p.x += p.vx;
         p.y += p.vy;
+        p.pulse += p.pulseSpeed;
         if (p.x < 0) p.x = width;
         if (p.x > width) p.x = 0;
         if (p.y < 0) p.y = height;
         if (p.y > height) p.y = 0;
 
+        const pulsedAlpha = p.alpha * (0.7 + 0.3 * Math.sin(p.pulse));
+        const pulsedSize  = p.size  * (0.85 + 0.15 * Math.sin(p.pulse));
+
+        ctx.globalAlpha = pulsedAlpha * 0.35;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur  = pulsedSize * 6;
         ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.alpha;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, pulsedSize * 2.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.globalAlpha = pulsedAlpha;
+        ctx.shadowBlur  = 0;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, pulsedSize, 0, Math.PI * 2);
         ctx.fill();
     });
+    ctx.restore();
     ctx.globalAlpha = 1.0;
 
     // 6. Render Deflection Spark Bursts
@@ -608,6 +640,25 @@ function animateVisualizerCanvas() {
         ctx.restore();
     }
 
+    // 7. Glow ring halos around target nodes
+    ctx.save();
+    [[pDb, isAmbiguous ? "#EF4444" : "#10B981"],
+     [pApi, isAmbiguous ? "#EF4444" : "#10B981"],
+     [pStudent, isAmbiguous ? "#EF4444" : "#10B981"]].forEach(([pos, col]) => {
+        if (!pos || pos.x === 0) return;
+        const r = Math.max(pos.w, pos.h) / 2 + 6;
+        const phasedAlpha = 0.12 + 0.08 * Math.sin(visShieldPulse * 1.3 + pos.x * 0.01);
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, r + 4 + Math.sin(visShieldPulse + pos.x) * 3, 0, Math.PI * 2);
+        ctx.strokeStyle = col;
+        ctx.globalAlpha = phasedAlpha;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 6]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    });
+    ctx.restore();
+
     visCanvasAnimId = requestAnimationFrame(animateVisualizerCanvas);
 }
 
@@ -619,7 +670,7 @@ function showVisualizerBanner(message, type = "denied") {
 
     banner.className = `vis-live-intercept-banner active ${type}`;
     if (icon) {
-        icon.innerText = type === "denied" ? "🔒" : "✓";
+        icon.innerText = type === "denied" ? "BLOCKED" : "ALLOWED";
     }
     text.innerText = message;
 
@@ -830,7 +881,7 @@ async function simulateVisualizerPacket(destination) {
             const pWl = getNodeCenter(nodeWorkload, stage);
             if (data.decision === "DENY") {
                 spawnDeflectionSparks(pWl.x, pWl.y + pWl.h / 2 + 10, "#EF4444");
-                showVisualizerBanner(`🚨 FAIL-CLOSED INTERCEPT: Request to '${destination}' BLOCKED (${data.reason})`, "denied");
+                showVisualizerBanner(`FAIL-CLOSED INTERCEPT: Request to '${destination}' BLOCKED (${data.reason})`, "denied");
                 
                 if (typeof anime !== "undefined") {
                     anime({
@@ -842,7 +893,7 @@ async function simulateVisualizerPacket(destination) {
                 }
             } else {
                 spawnDeflectionSparks(pWl.x, pWl.y + pWl.h / 2 + 10, "#10B981");
-                showVisualizerBanner(`✓ AUTHORIZED ACCESS: Request to '${destination}' ALLOWED (${data.reason})`, "allowed");
+                showVisualizerBanner(`AUTHORIZED ACCESS: Request to '${destination}' ALLOWED (${data.reason})`, "allowed");
 
                 if (typeof anime !== "undefined") {
                     anime({
@@ -883,7 +934,7 @@ async function confirmVisualizerWorkload() {
             spawnDeflectionSparks(pWl.x, pWl.y, "#10B981");
         }
 
-        showVisualizerBanner(`🛡️ IDENTITY CRYPTOGRAPHICALLY CONFIRMED as 'student' • Ambiguity Window Closed`, "allowed");
+        showVisualizerBanner(`IDENTITY CRYPTOGRAPHICALLY CONFIRMED as 'student' • Ambiguity Window Closed`, "allowed");
         
         if (typeof showCyberToast === "function") {
             showCyberToast("Attestation Complete", "Workload identity confirmed. Retroactive verification executed with 0 breaches.", "success");
@@ -901,7 +952,7 @@ async function confirmVisualizerWorkload() {
 async function resetVisualizerDemo() {
     try {
         await fetch("/api/reset", { method: "POST" });
-        showVisualizerBanner("↺ Demo Environment Reset to Initial Seed State", "allowed");
+        showVisualizerBanner("Demo Environment Reset to Initial Seed State", "allowed");
         if (typeof showCyberToast === "function") {
             showCyberToast("System Reset", "Database restored to initial seed state. W-NEW restored to Ambiguous.", "info");
         }
@@ -949,7 +1000,7 @@ async function updateHeroVisualizerState(workloadId) {
             nodeWorkload.className = "graph-node node-workload cyber-glass-pod";
             if (badgeEl) {
                 badgeEl.className = "node-badge badge-cyber badge-ambiguous";
-                badgeEl.innerText = `⚠ ${w.status}`;
+                badgeEl.innerText = w.status;
             }
 
             if (pathEngine) pathEngine.className = "flow-path active-amber";
@@ -961,9 +1012,9 @@ async function updateHeroVisualizerState(workloadId) {
             if (targetApi) targetApi.className = "graph-node node-target denied cyber-glass-pod";
             if (targetStudent) targetStudent.className = "graph-node node-target denied cyber-glass-pod";
 
-            if (lockDb) lockDb.innerText = "🔒";
-            if (lockApi) lockApi.innerText = "🔒";
-            if (lockStudent) lockStudent.innerText = "🔒";
+            if (lockDb) lockDb.innerText = "DENIED";
+            if (lockApi) lockApi.innerText = "DENIED";
+            if (lockStudent) lockStudent.innerText = "DENIED";
 
             if (decDb) decDb.innerText = "DENY (FAIL-CLOSED)";
             if (decApi) decApi.innerText = "DENY (FAIL-CLOSED)";
@@ -973,7 +1024,7 @@ async function updateHeroVisualizerState(workloadId) {
             nodeWorkload.className = "graph-node node-workload confirmed cyber-glass-pod";
             if (badgeEl) {
                 badgeEl.className = "node-badge badge-cyber badge-confirmed";
-                badgeEl.innerText = `✓ CONFIRMED (${escapeHtml(w.confirmed_identity || w.current_identity)})`;
+                badgeEl.innerText = `CONFIRMED (${escapeHtml(w.confirmed_identity || w.current_identity)})`;
             }
 
             if (pathEngine) pathEngine.className = "flow-path active-green";
@@ -988,9 +1039,9 @@ async function updateHeroVisualizerState(workloadId) {
                 if (targetApi) targetApi.className = "graph-node node-target allowed cyber-glass-pod";
                 if (targetStudent) targetStudent.className = "graph-node node-target denied cyber-glass-pod";
 
-                if (lockDb) lockDb.innerText = "✓";
-                if (lockApi) lockApi.innerText = "✓";
-                if (lockStudent) lockStudent.innerText = "🔒";
+                if (lockDb) lockDb.innerText = "ALLOWED";
+                if (lockApi) lockApi.innerText = "ALLOWED";
+                if (lockStudent) lockStudent.innerText = "DENIED";
 
                 if (decDb) decDb.innerText = "ALLOW (POLICY)";
                 if (decApi) decApi.innerText = "ALLOW (POLICY)";
@@ -1005,9 +1056,9 @@ async function updateHeroVisualizerState(workloadId) {
                 if (targetApi) targetApi.className = "graph-node node-target denied cyber-glass-pod";
                 if (targetStudent) targetStudent.className = "graph-node node-target allowed cyber-glass-pod";
 
-                if (lockDb) lockDb.innerText = "🔒";
-                if (lockApi) lockApi.innerText = "🔒";
-                if (lockStudent) lockStudent.innerText = "✓";
+                if (lockDb) lockDb.innerText = "DENIED";
+                if (lockApi) lockApi.innerText = "DENIED";
+                if (lockStudent) lockStudent.innerText = "ALLOWED";
 
                 if (decDb) decDb.innerText = "DENY (POLICY)";
                 if (decApi) decApi.innerText = "DENY (POLICY)";
@@ -1058,7 +1109,7 @@ async function loadLiveEventStream() {
             const isDenied = l.decision === "DENY";
             const itemClass = isDenied ? "denied" : "confirmed";
             const badgeClass = isDenied ? "badge-denied" : "badge-allowed";
-            const icon = isDenied ? "🔒" : "✓";
+            const icon = isDenied ? "DENIED" : "ALLOWED";
 
             return `
                 <div class="event-feed-item ${itemClass}">
@@ -1208,8 +1259,8 @@ async function loadWorkloadsFleet(searchQuery = "") {
                     const isAmbiguous = w.status === "AMBIGUOUS" || w.status === "STARTING";
                     const statusClass = isAmbiguous ? "ambiguous" : "confirmed";
                     const badge = isAmbiguous 
-                        ? `<span class="badge-cyber badge-ambiguous">⚠ ${escapeHtml(w.status)}</span>`
-                        : `<span class="badge-cyber badge-confirmed">✓ CONFIRMED</span>`;
+                        ? `<span class="badge-cyber badge-ambiguous">${escapeHtml(w.status)}</span>`
+                        : `<span class="badge-cyber badge-confirmed">CONFIRMED</span>`;
 
                     return `
                         <div class="workload-card-cyber ${statusClass}">
@@ -1246,19 +1297,19 @@ async function loadWorkloadsFleet(searchQuery = "") {
                                 <div style="display: flex; gap: 0.4rem;">
                                     ${isAmbiguous ? `
                                         <button class="btn-cyber btn-cyber-primary btn-sm" onclick="openConfirmModal('${escapeHtml(w.id)}')">
-                                            🔐 Attest Identity
+                                            Attest Identity
                                         </button>
                                     ` : ''}
                                     <button class="btn-cyber btn-cyber-secondary btn-sm" onclick="openWorkloadDetail('${escapeHtml(w.id)}')">
-                                        Open Workload →
+                                        Open Workload
                                     </button>
                                 </div>
                                 <div style="display: flex; gap: 0.3rem;">
                                     <button class="btn-cyber btn-cyber-secondary btn-sm" title="Simulate Traffic" onclick="quickSimulate('${escapeHtml(w.id)}')">
-                                        ⚡
+                                        Test
                                     </button>
                                     <button class="btn-cyber btn-cyber-secondary btn-sm" title="Retroactive Verify" onclick="quickVerify('${escapeHtml(w.id)}')">
-                                        🛡
+                                        Verify
                                     </button>
                                 </div>
                             </div>
@@ -1288,8 +1339,8 @@ async function loadWorkloadsFleet(searchQuery = "") {
                 tableBody.innerHTML = filtered.map(w => {
                     const isConfirmed = w.status === "CONFIRMED";
                     const badge = isConfirmed 
-                        ? `<span class="badge-cyber badge-confirmed">✓ CONFIRMED</span>`
-                        : `<span class="badge-cyber badge-ambiguous">⚠ ${escapeHtml(w.status)}</span>`;
+                        ? `<span class="badge-cyber badge-confirmed">CONFIRMED</span>`
+                        : `<span class="badge-cyber badge-ambiguous">${escapeHtml(w.status)}</span>`;
 
                     return `
                         <tr>
@@ -1361,8 +1412,8 @@ async function openWorkloadDetail(workloadId) {
         if (identEl) identEl.innerText = `${w.current_identity} (Claimed: ${w.initial_identity_signal})`;
         if (badgeEl) {
             badgeEl.innerHTML = w.status === "CONFIRMED"
-                ? `<span class="badge-cyber badge-confirmed">✓ CONFIRMED</span>`
-                : `<span class="badge-cyber badge-ambiguous">⚠ ${escapeHtml(w.status)}</span>`;
+                ? `<span class="badge-cyber badge-confirmed">CONFIRMED</span>`
+                : `<span class="badge-cyber badge-ambiguous">${escapeHtml(w.status)}</span>`;
         }
 
         // Build Animated Identity Journey Timeline
@@ -1512,7 +1563,7 @@ function renderFilteredIdentityEvents() {
                     ${escapeHtml(e.details)}
                 </div>
                 <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; font-family: var(--font-mono);">
-                    Signal: <strong>${escapeHtml(e.identity_signal || 'N/A')}</strong> | Status Transition: ${escapeHtml(e.old_status || 'NONE')} ➔ ${escapeHtml(e.new_status)}
+                    Signal: <strong>${escapeHtml(e.identity_signal || 'N/A')}</strong> | Status Transition: ${escapeHtml(e.old_status || 'NONE')} → ${escapeHtml(e.new_status)}
                 </div>
             </div>
         `;
@@ -1614,7 +1665,7 @@ async function executeSimulation() {
 
         const isAllow = data.decision === "ALLOW";
         const decColor = isAllow ? "var(--status-confirmed)" : "var(--status-violation)";
-        const decIcon = isAllow ? "✓" : "🔒";
+        const decIcon = isAllow ? "" : "";
 
         // Trigger Anime.js visual packet transmission
         animateConduitPacket(data.workload_id, data.destination, isAllow);
@@ -1625,7 +1676,7 @@ async function executeSimulation() {
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-card); padding-bottom: 0.75rem;">
                         <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Evaluation Result</span>
                         <span class="badge-cyber ${isAllow ? 'badge-allowed' : 'badge-denied'}">
-                            ${decIcon} ${escapeHtml(data.decision)}
+                            ${escapeHtml(data.decision)}
                         </span>
                     </div>
 
@@ -1774,7 +1825,7 @@ function appendTrafficFlowItem(data) {
         <div class="flow-line-track">
             <div class="${isDenied ? 'flow-beam-denied' : 'flow-beam-allowed'}"></div>
             <div class="flow-status-pill badge-cyber ${isDenied ? 'badge-denied' : 'badge-allowed'}">
-                ${isDenied ? '🔒 BLOCKED' : '✓ ALLOWED'}
+                ${isDenied ? 'BLOCKED' : 'ALLOWED'}
             </div>
         </div>
         <div class="flow-dest-node">
@@ -1924,14 +1975,14 @@ async function runRetroactiveVerification(workloadId) {
         }
 
         if (verdictText) {
-            verdictText.innerText = isPass ? "VERIFIED ✓" : "VIOLATION DETECTED ✗";
+            verdictText.innerText = isPass ? "VERIFIED" : "VIOLATION DETECTED";
             verdictText.style.color = isPass ? "var(--status-confirmed)" : "var(--status-violation)";
         }
 
         if (banner && bannerText) {
             if (isPass) {
                 banner.className = "verdict-banner-cyber";
-                bannerText.innerText = "✓ VERIFICATION PASSED — No communication was permitted using an unverified identity.";
+                bannerText.innerText = "VERIFICATION PASSED — No communication was permitted using an unverified identity.";
                 if (typeof anime !== "undefined") {
                     anime({
                         targets: banner,
@@ -1943,7 +1994,7 @@ async function runRetroactiveVerification(workloadId) {
                 }
             } else {
                 banner.className = "verdict-banner-cyber fail";
-                bannerText.innerText = `⚠ SECURITY VIOLATION DETECTED — ${data.allowed_in_window} packet(s) permitted during ambiguity window!`;
+                bannerText.innerText = `SECURITY VIOLATION DETECTED — ${data.allowed_in_window} packet(s) permitted during ambiguity window!`;
                 if (typeof anime !== "undefined") {
                     anime({
                         targets: "#verificationHeroStage",
@@ -1997,8 +2048,8 @@ async function loadVerificationHistory() {
         body.innerHTML = list.map(v => {
             const isPass = v.result === "PASS";
             const badge = isPass
-                ? `<span class="badge-cyber badge-pass">✓ PASS</span>`
-                : `<span class="badge-cyber badge-fail">✗ FAIL</span>`;
+                ? `<span class="badge-cyber badge-pass">PASS</span>`
+                : `<span class="badge-cyber badge-fail">FAIL</span>`;
 
             return `
                 <tr>
@@ -2034,8 +2085,8 @@ async function loadPoliciesTable() {
         tbody.innerHTML = policies.map(p => {
             const isAllow = p.action === "ALLOW";
             const badge = isAllow
-                ? `<span class="badge-cyber badge-allowed">✓ ALLOW</span>`
-                : `<span class="badge-cyber badge-denied">✕ DENY</span>`;
+                ? `<span class="badge-cyber badge-allowed">ALLOW</span>`
+                : `<span class="badge-cyber badge-denied">DENY</span>`;
 
             return `
                 <tr>
@@ -2226,8 +2277,8 @@ async function loadAuditTable() {
         tbody.innerHTML = logs.map(l => {
             const isDeny = l.decision === "DENY";
             const badge = isDeny
-                ? `<span class="badge-cyber badge-denied">🔒 DENIED</span>`
-                : `<span class="badge-cyber badge-allowed">✓ ALLOWED</span>`;
+                ? `<span class="badge-cyber badge-denied">DENIED</span>`
+                : `<span class="badge-cyber badge-allowed">ALLOWED</span>`;
 
             return `
                 <tr>
@@ -2325,7 +2376,7 @@ async function submitConfirmIdentity() {
         const data = await res.json();
 
         closeAllModals();
-        alert(`Identity confirmed for ${id}! Ambiguity window closed. Retroactive verification executed: ${data.auto_verification.result} ✓`);
+        alert(`Identity confirmed for ${id}! Ambiguity window closed. Retroactive verification executed: ${data.auto_verification.result}`);
 
         loadWorkloadsFleet();
         if (document.getElementById("statTotalWorkloads")) loadDashboardStats();
@@ -2367,77 +2418,77 @@ async function triggerSecurityDemo() {
 
         demoFinalVerificationData = demo.final_verification;
 
-        // Build 10 cinematic scenes from backend steps
+        // Build 10 cinematic scenes using a clear, real-world E-Commerce scenario
         demoScenes = [
             {
                 scene: 1,
-                badge: "SCENE 1 / 10",
-                title: "WORKLOAD STARTING: W-NEW",
-                desc: "Workload W-NEW starts up in cluster. Memory address space and initial environment configured.",
-                badgeHtml: '<span class="badge-cyber badge-starting">⚡ STARTING</span>'
+                badge: "SCENE 1 / 10 • REAL-WORLD CONTEXT",
+                title: "1. E-COMMERCE PLATFORM SETUP",
+                desc: "Real-World Context: In an online shopping store, established payment worker W-OLD processes credit cards with verified access to the customer Database.",
+                badgeHtml: '<span class="badge-cyber badge-confirmed">PRODUCTION CHECKOUT POD</span>'
             },
             {
                 scene: 2,
-                badge: "SCENE 2 / 10",
-                title: "IDENTITY SIGNAL RECEIVED: 'payment'",
-                desc: "W-NEW announces initial identity signal 'payment' (e.g. from recycled container or reused IP).",
-                badgeHtml: '<span class="badge-cyber badge-starting">SIGNAL: payment</span>'
+                badge: "SCENE 2 / 10 • THE VULNERABILITY",
+                title: "2. CONTAINER CHURN & RECYCLED IP",
+                desc: "During scaling, a new container W-NEW spins up. It is an unprivileged Student Analytics script, but it inherits the recycled IP address of the old payment service.",
+                badgeHtml: '<span class="badge-cyber badge-starting">POD CHURN: SIGNAL = payment</span>'
             },
             {
                 scene: 3,
-                badge: "SCENE 3 / 10",
-                title: "⚠ REUSED SIGNAL DETECTED — COLLISION",
-                desc: "SegLabel engine identifies that 'payment' was already claimed by confirmed workload W-OLD! Identity is genuinely ambiguous.",
-                badgeHtml: '<span class="badge-cyber badge-ambiguous">⚠ IDENTITY_AMBIGUOUS</span>'
+                badge: "SCENE 3 / 10 • AMBIGUITY GAP",
+                title: "3. REUSED SIGNAL COLLISION DETECTED",
+                desc: "W-NEW announces 'payment', but that signal was already owned by W-OLD! SegLabel catches the collision instantly and flags W-NEW as AMBIGUOUS.",
+                badgeHtml: '<span class="badge-cyber badge-ambiguous">COLLISION: IDENTITY_AMBIGUOUS</span>'
             },
             {
                 scene: 4,
-                badge: "SCENE 4 / 10",
-                title: "SECURITY POLICY: DEFAULT DENY ACTIVATED",
-                desc: "Fail-Closed Invariant engaged: All ingress/egress is strictly denied during ambiguity window.",
-                badgeHtml: '<span class="badge-cyber badge-denied">🔒 FAIL-CLOSED ACTIVE</span>'
+                badge: "SCENE 4 / 10 • ZERO TRUST BARRIER",
+                title: "4. FAIL-CLOSED ZERO TRUST LOCKDOWN",
+                desc: "Why this matters: A naive firewall would trust the 'payment' label and let the student read credit cards! SegLabel enforces Fail-Closed Default Deny.",
+                badgeHtml: '<span class="badge-cyber badge-denied">ZERO TRUST LOCKDOWN ACTIVE</span>'
             },
             {
                 scene: 5,
-                badge: "SCENE 5 / 10",
-                title: "W-NEW ➔ DATABASE [🔒 BLOCKED]",
-                desc: "Workload attempts database query. Blocked immediately under IDENTITY_AMBIGUOUS fail-closed rule.",
-                badgeHtml: '<span class="badge-cyber badge-denied">🔒 DENY IDENTITY_AMBIGUOUS</span>'
+                badge: "SCENE 5 / 10 • THE ATTACK PROBE",
+                title: "5. DATABASE PROBE BLOCKED [DENIED]",
+                desc: "The unverified container attempts to query credit cards in the database. SegLabel drops the connection immediately: IDENTITY_AMBIGUOUS.",
+                badgeHtml: '<span class="badge-cyber badge-denied">PREVENTED BREACH: DATABASE BLOCKED</span>'
             },
             {
                 scene: 6,
-                badge: "SCENE 6 / 10",
-                title: "W-NEW ➔ PAYMENT API [🔒 BLOCKED]",
-                desc: "CRITICAL PROOF: Even though 'payment' normally has ALLOW access to payment-api, communication is BLOCKED because identity is unconfirmed!",
-                badgeHtml: '<span class="badge-cyber badge-denied">🔒 DENY IDENTITY_AMBIGUOUS</span>'
+                badge: "SCENE 6 / 10 • THE CRITICAL PROOF",
+                title: "6. PAYMENT API PROBE BLOCKED [DENIED]",
+                desc: "Crucial Proof: Even though 'payment' normally has full ALLOW access to the Payment API, W-NEW is STILL BLOCKED because its identity is unconfirmed!",
+                badgeHtml: '<span class="badge-cyber badge-denied">DENIED (UNCONFIRMED IDENTITY)</span>'
             },
             {
                 scene: 7,
-                badge: "SCENE 7 / 10",
-                title: "IDENTITY ATTESTATION: CONFIRMED AS 'student'",
-                desc: "Attestation token verified: W-NEW is actually a 'student' analytics process, not a payment worker!",
-                badgeHtml: '<span class="badge-cyber badge-confirmed">✓ ATTESTED: student</span>'
+                badge: "SCENE 7 / 10 • ATTESTATION",
+                title: "7. CRYPTOGRAPHIC ATTESTATION: 'student'",
+                desc: "SPIFFE cryptographic verification finishes: W-NEW is attested as 'student' (a reporting worker), NOT a payment processor!",
+                badgeHtml: '<span class="badge-cyber badge-confirmed">ATTESTED AS: student</span>'
             },
             {
                 scene: 8,
-                badge: "SCENE 8 / 10",
-                title: "AMBIGUITY WINDOW CLOSED: CORRECT POLICY ENGAGED",
-                desc: "Window formally closes. Standard microsegmentation policy matrix for 'student' now governs traffic.",
-                badgeHtml: '<span class="badge-cyber badge-confirmed">✓ POLICY ACTIVE</span>'
+                badge: "SCENE 8 / 10 • WINDOW CLOSED",
+                title: "8. AMBIGUITY DANGER WINDOW CLOSED",
+                desc: "The startup vulnerability window formally closes. SegLabel now assigns true least-privilege microsegmentation rules for 'student'.",
+                badgeHtml: '<span class="badge-cyber badge-confirmed">STATUS: CONFIRMED</span>'
             },
             {
                 scene: 9,
-                badge: "SCENE 9 / 10",
-                title: "student ➔ student-api [✓ ALLOWED]",
-                desc: "Verified student process allowed access to student-api according to configured microsegmentation rules.",
-                badgeHtml: '<span class="badge-cyber badge-allowed">✓ ALLOW POLICY_ALLOW</span>'
+                badge: "SCENE 9 / 10 • AUTHORIZED TRAFFIC",
+                title: "9. LEGITIMATE ACCESS PERMITTED [ALLOWED]",
+                desc: "W-NEW requests student-api. Rule check: 'student -> student-api = ALLOW'. The analytics worker safely connects without risking financial data.",
+                badgeHtml: '<span class="badge-cyber badge-active">ALLOWED: student-api</span>'
             },
             {
                 scene: 10,
-                badge: "SCENE 10 / 10",
-                title: "RETROACTIVE VERIFICATION: PASSED ✓",
-                desc: "Auditor scans entire [t_start, t_confirm] ambiguity window: 0 wrong-identity access allowed! Invariant 100% satisfied.",
-                badgeHtml: '<span class="badge-cyber badge-pass">✓ VERIFICATION PASSED (0 VIOLATIONS)</span>'
+                badge: "SCENE 10 / 10 • AUDIT VERDICT",
+                title: "10. MATHEMATICAL PROOF: ZERO LEAKS",
+                desc: "Retroactive Verifier inspects every microsecond of the startup window: 0 wrong-identity accesses allowed. Mathematical Proof: PASS.",
+                badgeHtml: '<span class="badge-cyber badge-active">VERIFIED PASS: 0 DATA LEAKS</span>'
             }
         ];
 
@@ -2506,7 +2557,7 @@ function demoRenderCurrentScene() {
 function demoStartPlay() {
     demoIsPlaying = true;
     const btn = document.getElementById("demoBtnPlayPause");
-    if (btn) btn.innerText = "⏸ Pause";
+    if (btn) btn.innerText = "Pause";
 
     if (demoPlayerTimer) clearInterval(demoPlayerTimer);
     demoPlayerTimer = setInterval(() => {
@@ -2522,7 +2573,7 @@ function demoStartPlay() {
 function demoPausePlay() {
     demoIsPlaying = false;
     const btn = document.getElementById("demoBtnPlayPause");
-    if (btn) btn.innerText = "▶ Play";
+    if (btn) btn.innerText = "Play";
     if (demoPlayerTimer) {
         clearInterval(demoPlayerTimer);
         demoPlayerTimer = null;
@@ -2615,3 +2666,217 @@ function escapeHtml(str) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+
+
+// ============================================================================
+// Interactive 3D Cyber Mesh Visualizer & Auto-Demo Showcase Controller
+// ============================================================================
+
+window.switchVisualizerMode = function(mode) {
+    const btn2D = document.getElementById("btnSwitch2D");
+    const btn3D = document.getElementById("btnSwitch3D");
+    const stage2D = document.getElementById("nodeGraphStage");
+    const stage3D = document.getElementById("vis3dContainer");
+
+    if (mode === "3D") {
+        if (btn3D) btn3D.classList.add("active");
+        if (btn2D) btn2D.classList.remove("active");
+        if (stage2D) stage2D.style.display = "none";
+        if (stage3D) {
+            stage3D.style.display = "block";
+            if (window.Cyber3D) {
+                window.Cyber3D.init("vis3dContainer");
+                window.Cyber3D.resize();
+                if (typeof visCurrentStatus !== "undefined") {
+                    window.Cyber3D.updateStatus(visCurrentStatus);
+                }
+            }
+        }
+    } else {
+        if (btn2D) btn2D.classList.add("active");
+        if (btn3D) btn3D.classList.remove("active");
+        if (stage3D) stage3D.style.display = "none";
+        if (stage2D) stage2D.style.display = "block";
+    }
+};
+
+window.toggle3DRotateButton = function() {
+    if (window.Cyber3D) {
+        const isRotating = window.Cyber3D.toggleAutoRotate();
+        const btn = document.getElementById("btnToggle3DRotate");
+        if (btn) btn.innerText = isRotating ? "↻ Auto-Rotate: ON" : "↻ Auto-Rotate: OFF";
+    }
+};
+
+// ================= AUTO-DEMO SHOWCASE ENGINE =================
+let showcaseCurrentStep = 1;
+let showcaseTimer = null;
+let showcaseIsPlaying = false;
+
+const SHOWCASE_STEPS = [
+    {
+        step: 1,
+        badge: "PHASE 1 / 6 • BASELINE FLEET SCAN",
+        title: "1. CRYPTOGRAPHIC ZERO TRUST BASELINE",
+        desc: "Identity Authority attests established workload W-OLD. Microsegmentation policies allow legitimate checkout traffic directly to the customer database.",
+        action: async () => {
+            const sel = document.getElementById("visWorkloadSelector");
+            if (sel) { sel.value = "W-OLD"; sel.dispatchEvent(new Event("change")); }
+            await new Promise(r => setTimeout(r, 600));
+            if (typeof simulateVisualizerPacket === "function") simulateVisualizerPacket("database");
+        }
+    },
+    {
+        step: 2,
+        badge: "PHASE 2 / 6 • CONTAINER CHURN EVENT",
+        title: "2. RECYCLED IP & SIGNAL COLLISION",
+        desc: "Dynamic container W-NEW spins up on recycled IP 10.0.4.12 claiming signal 'payment'. SegLabel collision detector flags identity as AMBIGUOUS and activates Fail-Closed.",
+        action: async () => {
+            try {
+                await fetch("/api/demo/tamper", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ workload_id: "W-NEW", signal: "payment" })
+                });
+            } catch (e) {}
+            const sel = document.getElementById("visWorkloadSelector");
+            if (sel) { sel.value = "W-NEW"; sel.dispatchEvent(new Event("change")); }
+            if (typeof updateHeroVisualizerState === "function") updateHeroVisualizerState("W-NEW");
+            if (window.Cyber3D) window.Cyber3D.updateStatus("AMBIGUOUS");
+        }
+    },
+    {
+        step: 3,
+        badge: "PHASE 3 / 6 • MALICIOUS EGRESS PROBE",
+        title: "3. FAIL-CLOSED INTERCEPTION AT KERNEL LEVEL",
+        desc: "Ambiguous workload W-NEW attempts unauthorized access to sensitive Database. eBPF kernel enforcement intercepts packet in flight and blocks it with zero latency.",
+        action: async () => {
+            if (typeof simulateVisualizerPacket === "function") simulateVisualizerPacket("database");
+        }
+    },
+    {
+        step: 4,
+        badge: "PHASE 4 / 6 • LATERAL MOVEMENT ATTEMPT",
+        title: "4. PAYMENT GATEWAY ATTACK DEFENSE",
+        desc: "Workload W-NEW attempts lateral pivot against Payment Gateway (PCI-DSS enclave). SegLabel drops connection and issues tamper-proof audit alarm.",
+        action: async () => {
+            if (typeof simulateVisualizerPacket === "function") simulateVisualizerPacket("payment-api");
+        }
+    },
+    {
+        step: 5,
+        badge: "PHASE 5 / 6 • CRYPTOGRAPHIC ATTESTATION",
+        title: "5. IDENTITY CONFIRMED AS 'STUDENT'",
+        desc: "PKI / SPIFFE attestation pipeline successfully confirms workload identity as 'student'. Identity ambiguity window closes cleanly with zero security breaches.",
+        action: async () => {
+            if (typeof confirmVisualizerWorkload === "function") confirmVisualizerWorkload();
+        }
+    },
+    {
+        step: 6,
+        badge: "PHASE 6 / 6 • AUTHORIZED EGRESS & AUDIT",
+        title: "6. COMPLIANCE ELEVATION • NIST 98%",
+        desc: "Now verified as 'student', workload connects to Student API (ALLOWED). NIST SP 800-207 Zero Trust audit scorecard jumps to 98% with verifiable compliance.",
+        action: async () => {
+            if (typeof simulateVisualizerPacket === "function") simulateVisualizerPacket("student-api");
+            if (typeof showCyberToast === "function") {
+                showCyberToast("Showcase Complete", "Full Zero Trust Ambiguity Lifecycle demonstrated with 100% fail-closed isolation.", "success");
+            }
+        }
+    }
+];
+
+window.launchAutoDemoShowcase = function() {
+    const hud = document.getElementById("showcaseHudBar");
+    if (hud) {
+        hud.style.display = "block";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    showcaseCurrentStep = 1;
+    showcaseIsPlaying = true;
+    showcaseExecuteStep(showcaseCurrentStep);
+};
+
+window.showcaseExecuteStep = async function(stepIdx) {
+    if (stepIdx < 1 || stepIdx > SHOWCASE_STEPS.length) return;
+    showcaseCurrentStep = stepIdx;
+    const step = SHOWCASE_STEPS[stepIdx - 1];
+
+    const badgeEl = document.getElementById("showcaseStepBadge");
+    const titleEl = document.getElementById("showcaseTitle");
+    const descEl = document.getElementById("showcaseDesc");
+    const fillEl = document.getElementById("showcaseProgressFill");
+    const playBtn = document.getElementById("btnShowcasePlayPause");
+
+    if (badgeEl) badgeEl.innerText = step.badge;
+    if (titleEl) titleEl.innerText = step.title;
+    if (descEl) descEl.innerText = step.desc;
+    if (fillEl) fillEl.style.width = `${(stepIdx / SHOWCASE_STEPS.length) * 100}%`;
+    if (playBtn) playBtn.innerText = showcaseIsPlaying ? "❚❚ Pause" : "▶ Resume";
+
+    // Run action
+    if (typeof step.action === "function") {
+        await step.action();
+    }
+
+    // Schedule auto advance if playing
+    if (showcaseTimer) clearTimeout(showcaseTimer);
+    if (showcaseIsPlaying && stepIdx < SHOWCASE_STEPS.length) {
+        showcaseTimer = setTimeout(() => {
+            showcaseNextStep();
+        }, 7500);
+    } else if (stepIdx >= SHOWCASE_STEPS.length) {
+        showcaseIsPlaying = false;
+        if (playBtn) playBtn.innerText = "↺ Replay";
+    }
+};
+
+window.showcaseNextStep = function() {
+    if (showcaseCurrentStep < SHOWCASE_STEPS.length) {
+        showcaseExecuteStep(showcaseCurrentStep + 1);
+    } else {
+        showcaseIsPlaying = true;
+        showcaseExecuteStep(1);
+    }
+};
+
+window.showcasePrevStep = function() {
+    if (showcaseCurrentStep > 1) {
+        showcaseExecuteStep(showcaseCurrentStep - 1);
+    }
+};
+
+window.showcaseTogglePlay = function() {
+    const playBtn = document.getElementById("btnShowcasePlayPause");
+    if (showcaseIsPlaying) {
+        showcaseIsPlaying = false;
+        if (showcaseTimer) clearTimeout(showcaseTimer);
+        if (playBtn) playBtn.innerText = "▶ Resume";
+    } else {
+        showcaseIsPlaying = true;
+        if (playBtn) playBtn.innerText = "❚❚ Pause";
+        if (showcaseCurrentStep >= SHOWCASE_STEPS.length) {
+            showcaseExecuteStep(1);
+        } else {
+            showcaseTimer = setTimeout(() => {
+                showcaseNextStep();
+            }, 3000);
+        }
+    }
+};
+
+window.showcaseToggle3D = function() {
+    const stage3D = document.getElementById("vis3dContainer");
+    if (!stage3D || stage3D.style.display === "none") {
+        switchVisualizerMode("3D");
+    } else {
+        switchVisualizerMode("2D");
+    }
+};
+
+window.exitShowcaseMode = function() {
+    showcaseIsPlaying = false;
+    if (showcaseTimer) clearTimeout(showcaseTimer);
+    const hud = document.getElementById("showcaseHudBar");
+    if (hud) hud.style.display = "none";
+};

@@ -4,54 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SegLabel — Cybersecurity SaaS Command Center{% endblock %}</title>
+    <!-- Modern Enterprise Typography: Poppins & Montserrat -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/></svg>">
 </head>
 <body>
     <div class="app-layout">
-        <!-- Modern Cyber SaaS Navigation Sidebar -->
+        <!-- Modern SaaS Navigation Sidebar -->
         <aside class="cyber-sidebar" id="cyberSidebar">
             <a href="/" class="sidebar-brand">
-                <div class="brand-emblem">◈</div>
+                <div class="brand-emblem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                </div>
                 <div class="brand-info">
-                    <span class="brand-title">SEGLABEL</span>
-                    <span class="brand-subtitle">Security Control Plane</span>
+                    <span class="brand-title">SegLabel</span>
+                    <span class="brand-subtitle">Zero Trust Control Plane</span>
                 </div>
             </a>
 
             <nav class="sidebar-nav">
-                <div class="nav-section-title">Operations</div>
+                <div class="nav-section-title">Platform</div>
                 <a href="/" class="sidebar-link {% if request.path == '/' %}active{% endif %}" id="navCommandCenter">
-                    <span class="nav-icon">◉</span>
+                    <svg class="nav-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
                     <span>Command Center</span>
                 </a>
                 <a href="/workloads" class="sidebar-link {% if request.path == '/workloads' %}active{% endif %}" id="navWorkloads">
-                    <span class="nav-icon">◇</span>
+                    <svg class="nav-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
                     <span>Workloads Fleet</span>
                 </a>
                 <a href="/events" class="sidebar-link {% if request.path == '/events' %}active{% endif %}" id="navEvents">
-                    <span class="nav-icon">◇</span>
+                    <svg class="nav-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                     <span>Identity Events</span>
                 </a>
                 <a href="/simulator" class="sidebar-link {% if request.path == '/simulator' %}active{% endif %}" id="navSimulator">
-                    <span class="nav-icon">◇</span>
+                    <svg class="nav-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16.2 7.8 12 12m0 0-4.2 4.2M12 12l4.2 4.2M12 12 7.8 7.8"/></svg>
                     <span>Traffic Monitor</span>
+                </a>
+                <a href="/attacks" class="sidebar-link {% if request.path == '/attacks' %}active{% endif %}" id="navAttacks">
+                    <svg class="nav-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                    <span>Threat Scenarios</span>
                 </a>
 
                 <div class="nav-section-title" style="margin-top: 1rem;">Governance & Verification</div>
                 <a href="/verification" class="sidebar-link {% if request.path == '/verification' %}active{% endif %}" id="navVerification">
-                    <span class="nav-icon">◇</span>
-                    <span>Verification</span>
+                    <svg class="nav-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 11 12 14 22 4"/></svg>
+                    <span>Retroactive Audit</span>
                 </a>
                 <a href="/policies" class="sidebar-link {% if request.path == '/policies' %}active{% endif %}" id="navPolicies">
-                    <span class="nav-icon">◇</span>
+                    <svg class="nav-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
                     <span>Policy Matrix</span>
                 </a>
+                <a href="/compliance" class="sidebar-link {% if request.path == '/compliance' %}active{% endif %}" id="navCompliance">
+                    <svg class="nav-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/></svg>
+                    <span>Zero Trust & eBPF</span>
+                </a>
                 <a href="/audit" class="sidebar-link {% if request.path == '/audit' %}active{% endif %}" id="navAudit">
-                    <span class="nav-icon">◇</span>
+                    <svg class="nav-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
                     <span>Audit Logs</span>
                 </a>
             </nav>
@@ -62,16 +76,16 @@
                         <span class="status-label">System Status</span>
                         <div class="status-indicator-live">
                             <span class="pulse-dot"></span>
-                            <span>Online</span>
+                            <span>Active</span>
                         </div>
                     </div>
                     <div class="status-subtext">
-                        Engine Operational<br>
-                        <span style="color: var(--accent-cyan);">Fail-Closed Policy Active</span>
+                        Policy Engine Operational<br>
+                        <span style="color: var(--status-confirmed); font-weight: 600;">Fail-Closed Enforced</span>
                     </div>
                     <div style="margin-top: 0.75rem;">
                         <button class="btn-cyber btn-cyber-secondary btn-sm" id="btnResetSystem" style="width: 100%;" title="Reset all data to seed defaults">
-                            ↺ Reset Database
+                            Reset Database
                         </button>
                     </div>
                 </div>
@@ -80,41 +94,70 @@
 
         <!-- Main Content Area -->
         <div class="app-main">
+            <!-- Interactive Auto-Demo Showcase Floating HUD -->
+            <div class="showcase-hud-bar" id="showcaseHudBar" style="display: none;">
+                <div class="showcase-hud-header">
+                    <div class="showcase-hud-badge">
+                        <span class="pulse-dot" style="background:#06B6D4;"></span>
+                        <span>LIVE SOC SHOWCASE</span>
+                    </div>
+                    <div class="showcase-hud-step-badge" id="showcaseStepBadge">PHASE 1 / 6</div>
+                    <div class="showcase-hud-title" id="showcaseTitle">FLEET DISCOVERY & BASELINE ESTABLISHMENT</div>
+                </div>
+                <div class="showcase-hud-body">
+                    <p class="showcase-hud-desc" id="showcaseDesc">Initializing Zero Trust baseline scan. Identity Authority attests workload W-OLD with production checkout privileges.</p>
+                </div>
+                <div class="showcase-hud-progress-track">
+                    <div class="showcase-hud-progress-fill" id="showcaseProgressFill" style="width: 16.6%;"></div>
+                </div>
+                <div class="showcase-hud-actions">
+                    <button type="button" class="btn-cyber btn-cyber-secondary btn-sm" id="btnShowcasePrev" onclick="showcasePrevStep()">⏮ Prev</button>
+                    <button type="button" class="btn-cyber btn-cyber-primary btn-sm" id="btnShowcasePlayPause" onclick="showcaseTogglePlay()">❚❚ Pause</button>
+                    <button type="button" class="btn-cyber btn-cyber-secondary btn-sm" id="btnShowcaseNext" onclick="showcaseNextStep()">Next ⏭</button>
+                    <button type="button" class="btn-cyber btn-cyber-demo btn-sm" id="btnShowcaseSwitch3D" onclick="showcaseToggle3D()">🌐 Toggle 3D View</button>
+                    <button type="button" class="btn-cyber btn-cyber-danger btn-sm" onclick="exitShowcaseMode()">✕ Exit Showcase</button>
+                </div>
+            </div>
+
             <!-- Top Command Header Bar -->
             <header class="cyber-topbar">
                 <div class="topbar-left">
                     <button class="btn-cyber btn-cyber-secondary btn-sm" id="btnToggleSidebar" style="display: none;" aria-label="Toggle navigation">
-                        ☰
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                     </button>
                     <div class="page-breadcrumb">
                         <span>SegLabel</span>
-                        <span>/</span>
+                        <span class="breadcrumb-separator">/</span>
                         <span class="current">{% block breadcrumb %}Security Control Plane{% endblock %}</span>
                     </div>
                     <div class="topbar-live-badge">
                         <span class="pulse-dot"></span>
-                        <span>SECURITY ENGINE ONLINE</span>
+                        <span>CONTROL PLANE ONLINE</span>
                     </div>
                     <div id="topbarAmbiguityAlert" class="badge-cyber badge-ambiguous" style="display: none;">
-                        ⚠ <span id="topbarAmbiguousCount">0</span> AMBIGUOUS WORKLOAD(S)
+                        <span id="topbarAmbiguousCount">0</span> AMBIGUOUS WORKLOAD(S)
                     </div>
                 </div>
 
                 <div class="topbar-actions">
+                    <button class="btn-cyber btn-auto-showcase" id="btnLaunchShowcase" title="Launch Interactive Guided Auto-Demo Showcase">
+                        <span class="showcase-pulse-ring"></span>
+                        ▶ Auto-Demo Showcase
+                    </button>
                     <button class="btn-cyber btn-cyber-demo btn-run-demo" title="Execute automated 10-step security validation scenario">
-                        ▶ Run Security Demo
+                        Run Security Demo
                     </button>
                     
                     <!-- Authenticated Operator Info & Logout -->
                     <div class="user-session-capsule">
                         <div class="user-session-info">
-                            <span class="user-role-tag">ADMIN</span>
+                            <span class="user-role-tag">Admin</span>
                             <span class="user-session-name">{{ session.get('username', 'Operator') }}</span>
                             <span class="user-status-dot" title="Authenticated Session"></span>
                         </div>
                         <form action="/logout" method="POST" style="display: inline; margin: 0;">
                             <button type="submit" class="btn-cyber btn-cyber-secondary btn-sm btn-logout" title="Terminate Secure Session">
-                                ⎋ Logout
+                                Logout
                             </button>
                         </form>
                     </div>
@@ -133,12 +176,21 @@
         <div class="modal-dialog-cyber demo-modal-dialog">
             <div class="modal-header-cyber">
                 <div class="modal-title-cyber">
-                    <span>🛡</span>
                     <span>Cinematic Security Demo — Identity Ambiguity Lifecycle</span>
                 </div>
-                <button class="modal-close-cyber" onclick="closeAllModals()">✕</button>
+                <button class="modal-close-cyber" onclick="closeAllModals()" aria-label="Close modal">&times;</button>
             </div>
             <div class="modal-body-cyber">
+                <!-- Real-World Analogy Banner -->
+                <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.85rem 1.25rem; margin-bottom: 1.25rem;">
+                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); letter-spacing: 0.02em; text-transform: uppercase;">
+                        Real-World Scenario: E-Commerce Checkout vs Intern Container
+                    </div>
+                    <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.25rem; line-height: 1.5;">
+                        How SegLabel prevents a student analytics container from accessing financial credit card databases when Kubernetes recycles a pod's IP address.
+                    </div>
+                </div>
+
                 <!-- Scene Display Box -->
                 <div class="demo-scene-display" id="demoSceneDisplay">
                     <div class="demo-scene-badge" id="demoSceneBadge">SCENE 1 / 10</div>
@@ -147,16 +199,16 @@
                         Initializing new workload W-NEW in microsegmentation cluster...
                     </div>
                     <div id="demoSceneStatusBadge" style="margin-top: 1rem;">
-                        <span class="badge-cyber badge-starting">⚡ STARTING</span>
+                        <span class="badge-cyber badge-starting">STARTING</span>
                     </div>
                 </div>
 
                 <!-- Stepper Progress Dots & Controls -->
                 <div class="demo-controls-bar">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <button class="btn-cyber btn-cyber-secondary btn-sm" id="demoBtnPrev" onclick="demoPrevScene()">◀ Prev</button>
-                        <button class="btn-cyber btn-cyber-primary btn-sm" id="demoBtnPlayPause" onclick="demoTogglePlay()">⏸ Pause</button>
-                        <button class="btn-cyber btn-cyber-secondary btn-sm" id="demoBtnNext" onclick="demoNextScene()">Next ▶</button>
+                        <button class="btn-cyber btn-cyber-secondary btn-sm" id="demoBtnPrev" onclick="demoPrevScene()">Previous</button>
+                        <button class="btn-cyber btn-cyber-primary btn-sm" id="demoBtnPlayPause" onclick="demoTogglePlay()">Pause</button>
+                        <button class="btn-cyber btn-cyber-secondary btn-sm" id="demoBtnNext" onclick="demoNextScene()">Next</button>
                     </div>
 
                     <!-- 10 Dots -->
@@ -174,8 +226,8 @@
                     </div>
 
                     <div style="display: flex; gap: 0.5rem;">
-                        <button class="btn-cyber btn-cyber-secondary btn-sm" onclick="demoReplay()">↺ Replay</button>
-                        <button class="btn-cyber btn-cyber-secondary btn-sm" onclick="demoSkipToEnd()">⏩ Skip</button>
+                        <button class="btn-cyber btn-cyber-secondary btn-sm" onclick="demoReplay()">Replay</button>
+                        <button class="btn-cyber btn-cyber-secondary btn-sm" onclick="demoSkipToEnd()">Skip</button>
                     </div>
                 </div>
 
@@ -188,7 +240,7 @@
                 </div>
             </div>
             <div class="modal-footer-cyber">
-                <a href="/audit" class="btn-cyber btn-cyber-secondary btn-sm">View Audit Trail →</a>
+                <a href="/audit" class="btn-cyber btn-cyber-secondary btn-sm">View Audit Trail</a>
                 <button class="btn-cyber btn-cyber-primary btn-sm" onclick="closeAllModals()">Close Demo</button>
             </div>
         </div>
@@ -199,10 +251,9 @@
         <div class="modal-dialog-cyber">
             <div class="modal-header-cyber">
                 <div class="modal-title-cyber">
-                    <span>🔐</span>
                     <span>Confirm Workload Identity Attestation</span>
                 </div>
-                <button class="modal-close-cyber" onclick="closeAllModals()">✕</button>
+                <button class="modal-close-cyber" onclick="closeAllModals()" aria-label="Close modal">&times;</button>
             </div>
             <div class="modal-body-cyber">
                 <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1.25rem;">
@@ -232,19 +283,18 @@
         <div class="modal-dialog-cyber" style="max-width: 720px;">
             <div class="modal-header-cyber">
                 <div class="modal-title-cyber" id="detailModalTitle">
-                    <span>●</span>
                     <span id="detailWorkloadHeader">W-204 | Workload Details</span>
                 </div>
-                <button class="modal-close-cyber" onclick="closeAllModals()">✕</button>
+                <button class="modal-close-cyber" onclick="closeAllModals()" aria-label="Close modal">&times;</button>
             </div>
             <div class="modal-body-cyber">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
                     <div>
                         <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Current Identity State</div>
-                        <div style="font-size: 1.1rem; font-weight: 700; color: #FFFFFF;" id="detailCurrentIdentity">payment</div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);" id="detailCurrentIdentity">payment</div>
                     </div>
                     <div id="detailStatusBadge">
-                        <span class="badge-cyber badge-ambiguous">⚠ AMBIGUOUS</span>
+                        <span class="badge-cyber badge-ambiguous">AMBIGUOUS</span>
                     </div>
                 </div>
 
@@ -275,10 +325,9 @@
         <div class="modal-dialog-cyber">
             <div class="modal-header-cyber">
                 <div class="modal-title-cyber">
-                    <span>+</span>
                     <span>Register Simulated Workload</span>
                 </div>
-                <button class="modal-close-cyber" onclick="closeAllModals()">✕</button>
+                <button class="modal-close-cyber" onclick="closeAllModals()" aria-label="Close modal">&times;</button>
             </div>
             <div class="modal-body-cyber">
                 <div class="form-group-cyber">
@@ -311,6 +360,10 @@
         </div>
     </div>
 
+    <!-- Three.js 3D WebGL Engine -->
+    <script src="{{ url_for('static', filename='js/three.min.js') }}"></script>
+    <!-- Cyber3D Topology Mesh Controller -->
+    <script src="{{ url_for('static', filename='js/cyber3d.js') }}"></script>
     <!-- Anime.js High-Performance Motion Engine -->
     <script src="{{ url_for('static', filename='js/anime.min.js') }}"></script>
     <!-- Application Controller -->

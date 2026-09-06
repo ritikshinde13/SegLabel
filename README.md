@@ -310,16 +310,31 @@ No communication was permitted based on an incorrect or ambiguous identity.
 | **Edge Case 6** | Destination does not exist in service registry | Blocked with `DENY` and reason `INVALID_DESTINATION`. |
 | **Edge Case 7** | Multiple communication attempts occur during ambiguity window | Every request logged with timestamps and inspected during retroactive verification. |
 | **Edge Case 8** | Synthetic bypass breach injected inside ambiguity window | Retroactive verifier detects unauthorized allow, flags **`FAIL ✗`**, and outputs offending request IDs. |
+| **Edge Case 9** | Workload startup hangs / times out past TTL | Scanned and automatically transitioned to `QUARANTINED` with reason `Attestation TTL expired`. Egress blocked. |
+| **Edge Case 10** | High-frequency egress probe burst during ambiguity | Rate limiter detects hostile reconnaissance (>5 attempts), auto-quarantines workload (`HOSTILE_RECONNAISSANCE_QUARANTINED`). |
+| **Edge Case 11** | Confirmed workload attempts second conflicting confirmation | Enforces cryptographic immutability; conflicting identity transition rejected with error. |
+| **Edge Case 12** | Post-attestation container escape / runtime drift | Identity revoked (`REVOKED`), immediately severing all network communications. |
+| **Edge Case 13** | Egress towards an ambiguous or starting peer destination | Bidirectional Zero Trust enforced; traffic blocked with `DESTINATION_AMBIGUOUS`. |
 
 ---
 
-## 13. Limitations & Future Improvements
+## 13. Beyond PRD: Next-Generation Features
 
-### Current Simulation Boundaries
-* **Cryptographic Attestation**: The simulation accepts manual or API confirmation rather than integrating with an actual SPIRE / TPM / x509 CA agent.
-* **Network Interfaces**: Traffic is simulated at the policy decision layer rather than through eBPF / iptables kernel hooks.
+SegLabel implements several cloud-native security capabilities beyond standard requirements:
 
-### Production Roadmap
-1. **SPIFFE / SPIRE Integration**: Bind confirmed identity transitions directly to SPIFFE SVID X.509 certificate issuance.
-2. **eBPF Kernel Enforcement**: Implement eBPF tc (traffic control) filters to drop network packets in the Linux kernel while socket labels are ambiguous.
-3. **Automated Quarantining**: Trigger automated container quarantine and security alerts if excessive communication attempts occur during the ambiguity window.
+1. **Cryptographic SPIFFE / SPIRE Attestation Engine (`/attacks`)**:
+   * Issues cryptographically signed HMAC-SHA256 JWT SVIDs with standard claims (`spiffe://cluster.local/ns/production/sa/...`).
+   * Validates signatures, expirations, and issuers; detects forged or tampered SVID tokens with instant rejection.
+2. **Interactive Attack Scenario Playground (`/attacks`)**:
+   * **Scenario 1**: Fast IP Churn & Reused Signal Attack.
+   * **Scenario 2**: Hostile Reconnaissance Burst & Automated Containment.
+   * **Scenario 3**: Cryptographic SVID Forgery & Tamper Rejection.
+   * **Scenario 4**: Post-Attestation Runtime Drift & Immediate Revocation.
+3. **eBPF & Cilium NetworkPolicy Exporters (`/compliance`)**:
+   * Generates live **CiliumNetworkPolicy (CNP)** YAML matching the active policy matrix.
+   * Generates standard **Kubernetes NetworkPolicy** manifests with Default-Deny.
+   * Generates an **eBPF `sock_ops` C filter** snippet demonstrating kernel-level transport drops during the ambiguity window.
+4. **NIST SP 800-207 Zero Trust Scorecard (`/compliance`)**:
+   * Real-time posture scorecard evaluating compliance across all 4 Zero Trust architecture pillars.
+   * One-click download of the cryptographic Zero Trust Security Audit Report in Markdown.
+

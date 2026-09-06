@@ -7,7 +7,6 @@
 <div class="hero-command-banner">
     <div class="hero-info">
         <div class="hero-tag">
-            <span>◈</span>
             <span>Zero Trust Microsegmentation Control Plane</span>
         </div>
         <h1 class="hero-title">SEGLABEL CONTROL PLANE</h1>
@@ -15,13 +14,13 @@
             Autonomous protection against the <strong>Workload Identity Ambiguity Window</strong>. When recycled signals or startup races cause identity collisions, our engine enforces an absolute <em>Fail-Closed Default Deny</em> until cryptographic attestation confirms the true identity.
         </p>
         <div class="hero-invariant-strip">
-            <span>🔒 CORE INVARIANT:</span>
-            <span>AMBIGUOUS IDENTITY ➔ ALL EGRESS & INGRESS TRAFFIC DENIED</span>
+            <span>CORE INVARIANT:</span>
+            <span>AMBIGUOUS IDENTITY → ALL EGRESS & INGRESS TRAFFIC DENIED</span>
         </div>
     </div>
     <div class="hero-actions">
         <button class="btn-cyber btn-cyber-primary btn-run-demo" style="padding: 0.85rem 1.6rem; font-size: 0.95rem;">
-            ▶ Run Security Demo
+            Run Security Demo
         </button>
         <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
             Scenario: 10-Scene Ambiguity Validation
@@ -55,7 +54,7 @@
     <div class="metric-module amber">
         <div class="metric-header">
             <span class="metric-label">Identity Ambiguities</span>
-            <span class="metric-trend trend-amber" id="trendAmbiguities">⚠ ATTENTION</span>
+            <span class="metric-trend trend-amber" id="trendAmbiguities">ATTENTION</span>
         </div>
         <div class="metric-body">
             <span class="metric-value counter-anim" id="statAmbiguousWorkloads" style="color: var(--status-ambiguous);">0</span>
@@ -112,6 +111,44 @@
     </div>
 </div>
 
+<!-- NIST SP 800-207 Zero Trust Posture & Compliance Banner -->
+<div class="card-cyber" style="margin-bottom: 2rem; border-left: 4px solid var(--accent-blue);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 11 12 14 22 4"/></svg>
+            </div>
+            <div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-weight: 700; font-size: 1.05rem; color: var(--text-primary);">NIST SP 800-207 Zero Trust Security Posture</span>
+                    <span class="badge-cyber badge-active" id="homeScorecardMaturity">OPTIMAL (LEVEL 4)</span>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                    Continuous mathematical audit of identity ambiguity windows & microsegmentation policies.
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div style="text-align: right;">
+                <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono); font-weight: 600;">ZERO TRUST SCORE</div>
+                <div style="font-size: 1.35rem; font-weight: 800; color: var(--accent-blue);" id="homeScorecardVal">--%</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono); font-weight: 600;">AMBIGUITY DEFENSE</div>
+                <div style="font-size: 1.35rem; font-weight: 800; color: var(--status-confirmed);" id="homeDefenseRate">100%</div>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn-cyber btn-cyber-secondary btn-sm" id="btnHomeDownloadReport" title="Download cryptographic security audit in markdown">
+                    Audit Report (.md)
+                </button>
+                <a href="/compliance" class="btn-cyber btn-cyber-secondary btn-sm">
+                    View Scorecard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Central Hero Animated Security Visualization Component -->
 <div class="hero-visualizer-card" id="heroVisualizerCard">
     <div class="visualizer-top-bar">
@@ -123,6 +160,14 @@
             <div>
                 <h2 class="visualizer-title">Live Security Visualization Engine</h2>
                 <div class="visualizer-subtitle">Zero Trust Identity Ambiguity Window & Real-Time Egress Topology</div>
+            </div>
+            <div class="vis-view-switcher" id="visViewSwitcher">
+                <button type="button" class="vis-switch-btn active" id="btnSwitch2D" onclick="switchVisualizerMode('2D')">
+                    <span class="switch-icon">📊</span> 2D Schematic
+                </button>
+                <button type="button" class="vis-switch-btn" id="btnSwitch3D" onclick="switchVisualizerMode('3D')">
+                    <span class="switch-icon">🌐</span> 3D Cyber Mesh
+                </button>
             </div>
             <span class="visualizer-badge" id="visStatusBadge">Interactive Graph</span>
         </div>
@@ -164,40 +209,40 @@
         <svg class="graph-svg-overlay" id="graphSvgOverlay" viewBox="0 0 900 320" preserveAspectRatio="none">
             <defs>
                 <linearGradient id="laserCyanGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.9"/>
-                    <stop offset="100%" stop-color="#2563EB" stop-opacity="0.4"/>
+                    <stop offset="0%" stop-color="#2563EB" stop-opacity="0.8"/>
+                    <stop offset="100%" stop-color="#1D4ED8" stop-opacity="0.3"/>
                 </linearGradient>
                 <linearGradient id="laserGreenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#10B981" stop-opacity="0.9"/>
-                    <stop offset="100%" stop-color="#059669" stop-opacity="0.4"/>
+                    <stop offset="0%" stop-color="#059669" stop-opacity="0.8"/>
+                    <stop offset="100%" stop-color="#047857" stop-opacity="0.3"/>
                 </linearGradient>
                 <linearGradient id="laserRedGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#EF4444" stop-opacity="0.9"/>
-                    <stop offset="100%" stop-color="#991B1B" stop-opacity="0.4"/>
+                    <stop offset="0%" stop-color="#DC2626" stop-opacity="0.8"/>
+                    <stop offset="100%" stop-color="#991B1B" stop-opacity="0.3"/>
                 </linearGradient>
-                <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="3" result="blur" />
+                <filter id="glowBlue" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="2" result="blur" />
                     <feComposite in="SourceGraphic" in2="blur" operator="over" />
                 </filter>
             </defs>
 
             <!-- Conduit Line 1: Identity Authority -> Monitored Workload -->
-            <path id="pathEngineToWorkload" d="M 450 65 L 450 120" class="flow-path active-amber"></path>
+            <path id="pathEngineToWorkload" d="M 450 70 L 450 125" class="flow-path active-amber"></path>
             
             <!-- Conduit Line 2: Workload -> Database Target -->
-            <path id="pathWorkloadToDb" d="M 450 185 C 450 220, 180 220, 180 250" class="flow-path blocked-red"></path>
+            <path id="pathWorkloadToDb" d="M 450 205 C 450 242, 160 238, 160 275" class="flow-path blocked-red"></path>
             
             <!-- Conduit Line 3: Workload -> Payment API Target -->
-            <path id="pathWorkloadToApi" d="M 450 185 L 450 250" class="flow-path blocked-red"></path>
+            <path id="pathWorkloadToApi" d="M 450 205 L 450 275" class="flow-path blocked-red"></path>
 
             <!-- Conduit Line 4: Workload -> Student API Target -->
-            <path id="pathWorkloadToStudent" d="M 450 185 C 450 220, 720 220, 720 250" class="flow-path blocked-red"></path>
+            <path id="pathWorkloadToStudent" d="M 450 205 C 450 242, 740 238, 740 275" class="flow-path blocked-red"></path>
 
             <!-- Animated Packet Energy Spheres -->
-            <circle id="animPacketEngine" r="5" fill="#00E5FF" filter="url(#glowCyan)"></circle>
-            <circle id="animPacketDb" r="5" fill="#EF4444"></circle>
-            <circle id="animPacketApi" r="5" fill="#EF4444"></circle>
-            <circle id="animPacketStudent" r="5" fill="#EF4444"></circle>
+            <circle id="animPacketEngine" r="5" fill="#2563EB" filter="url(#glowBlue)"></circle>
+            <circle id="animPacketDb" r="5" fill="#DC2626"></circle>
+            <circle id="animPacketApi" r="5" fill="#DC2626"></circle>
+            <circle id="animPacketStudent" r="5" fill="#DC2626"></circle>
         </svg>
 
         <!-- Top Node: Cryptographic Identity Authority -->
@@ -232,6 +277,34 @@
             <span class="banner-icon" id="visBannerIcon">🛡️</span>
             <span class="banner-text" id="visBannerText">ZERO TRUST AMBIGUITY QUARANTINE ACTIVE — ALL EGRESS TRAFFIC INTERCEPTED</span>
         </div>
+
+    <!-- Interactive 3D Cyber Mesh Viewport -->
+    <div class="vis-3d-stage" id="vis3dContainer" style="display: none;">
+        <div class="vis-3d-overlay-controls">
+            <button type="button" class="btn-cyber btn-cyber-secondary btn-sm" onclick="window.Cyber3D && window.Cyber3D.resetCamera()" title="Reset 3D Camera Position">
+                ↺ Reset Camera
+            </button>
+            <button type="button" class="btn-cyber btn-cyber-secondary btn-sm" id="btnToggle3DRotate" onclick="toggle3DRotateButton()" title="Toggle Auto-Rotation">
+                ↻ Auto-Rotate: ON
+            </button>
+            <button type="button" class="btn-cyber btn-cyber-primary btn-sm" onclick="simulateVisualizerPacket('database')" title="Test DB egress in 3D">
+                ⚡ Test DB
+            </button>
+            <button type="button" class="btn-cyber btn-cyber-primary btn-sm" onclick="simulateVisualizerPacket('payment-api')" title="Test Payment API egress in 3D">
+                ⚡ Test Payment API
+            </button>
+            <button type="button" class="btn-cyber btn-cyber-primary btn-sm" onclick="simulateVisualizerPacket('student-api')" title="Test Student API egress in 3D">
+                ⚡ Test Student API
+            </button>
+            <span class="badge-cyber badge-confirmed" style="display: inline-flex; align-items: center; gap: 4px;">
+                <span class="status-pulse-dot" style="background:#06B6D4;"></span> 3D WebGL Mesh
+            </span>
+        </div>
+        <div class="vis-3d-instructions">
+            <span>🖱️ <strong>Left Click + Drag:</strong> Orbit / Rotate &nbsp;|&nbsp; <strong>Scroll Wheel:</strong> Zoom &nbsp;|&nbsp; <strong>Hover:</strong> Node Telemetry &nbsp;|&nbsp; <strong>Click 3D Nodes:</strong> Test Egress</span>
+        </div>
+    </div>
+
 
         <!-- Bottom Row: Target Enclaves (Database, Payment API, Student API) -->
         <div class="graph-targets-row">
@@ -279,7 +352,7 @@
         <!-- Card 1: The Threat Model -->
         <div class="explainer-box threat-box">
             <div class="box-header">
-                <span class="box-tag tag-threat">⚠ VULNERABLE ARCHITECTURE (WITHOUT SEGLABEL)</span>
+                <span class="box-tag tag-threat">VULNERABLE ARCHITECTURE (WITHOUT SEGLABEL)</span>
                 <h4 class="box-title">Reused Signal Triggers Catastrophic Breach</h4>
             </div>
             <div class="box-visual">
@@ -289,15 +362,15 @@
                 </div>
                 <div class="visual-arrow arrow-collision">
                     <span>IP / Token Recycled</span>
-                    <span class="arrow-symb">⮂ Collision</span>
+                    <span class="arrow-symb">Collision</span>
                 </div>
                 <div class="visual-node v-new-danger">
                     <strong>W-NEW (Unconfirmed)</strong>
                     <span>Claims 'payment'</span>
                 </div>
                 <div class="visual-arrow arrow-leak">
-                    <span class="leak-badge">PERMISSIVE LEAK!</span>
-                    <span class="arrow-symb">➔ Database Access</span>
+                    <span class="leak-badge">PERMISSIVE LEAK</span>
+                    <span class="arrow-symb">→ Database Access</span>
                 </div>
             </div>
             <p class="box-desc">
@@ -308,7 +381,7 @@
         <!-- Card 2: SegLabel Zero Trust Solution -->
         <div class="explainer-box solution-box">
             <div class="box-header">
-                <span class="box-tag tag-solution">✓ SEGLABEL ZERO TRUST ENFORCEMENT</span>
+                <span class="box-tag tag-solution">SEGLABEL ZERO TRUST ENFORCEMENT</span>
                 <h4 class="box-title">Cryptographic Fail-Closed Quarantine & Verification</h4>
             </div>
             <div class="box-visual">
@@ -317,7 +390,6 @@
                     <span class="badge-amber-sm">AMBIGUOUS</span>
                 </div>
                 <div class="visual-shield">
-                    <span class="shield-icon">🛡️</span>
                     <span>FAIL-CLOSED BARRIER</span>
                 </div>
                 <div class="visual-node v-confirmed">
@@ -325,7 +397,7 @@
                     <span class="badge-green-sm">True: student</span>
                 </div>
                 <div class="visual-result">
-                    <span class="pass-badge">PASS: 0 BREACHES ✓</span>
+                    <span class="pass-badge">PASS: 0 BREACHES</span>
                     <span>Retroactively Verified</span>
                 </div>
             </div>
@@ -336,16 +408,43 @@
     </div>
 </div>
 
+<!-- Cloud-Native Policy & eBPF Exporter Panel on Homepage -->
+<div class="card-cyber" style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">
+                    Cloud-Native Policy & eBPF Generator
+                </h2>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                Export active SegLabel rules directly into Cilium, Kubernetes NetworkPolicy, or Linux kernel eBPF filters.
+            </p>
+        </div>
+        <button class="btn-cyber btn-cyber-secondary btn-sm" id="btnHomeCopyPolicy">
+            Copy Active Code
+        </button>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+        <button class="btn-cyber btn-sm btn-home-tab active" data-tab="cilium">CiliumNetworkPolicy (YAML)</button>
+        <button class="btn-cyber btn-sm btn-home-tab" data-tab="k8s">Kubernetes NetworkPolicy (YAML)</button>
+        <button class="btn-cyber btn-sm btn-home-tab" data-tab="ebpf">eBPF Socket Filter (C)</button>
+    </div>
+
+    <pre id="homePolicyCodeViewer" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1.25rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--accent-blue-deep); overflow-x: auto; max-height: 280px; line-height: 1.5;"></pre>
+</div>
+
 <!-- Two-Column Split: Live Event Stream + Quick Traffic Simulator -->
 <div class="dashboard-split-grid">
     <!-- Left Column: Live Security Event Feed -->
     <div class="cyber-card">
         <div class="card-header-cyber">
             <div class="card-title-cyber">
-                <span>⚡</span>
                 <span>LIVE SECURITY EVENTS</span>
             </div>
-            <a href="/audit" class="btn-cyber btn-cyber-secondary btn-sm">View Full Audit →</a>
+            <a href="/audit" class="btn-cyber btn-cyber-secondary btn-sm">View Full Audit</a>
         </div>
         <div class="card-body-cyber" style="padding: 1rem;">
             <div class="live-event-feed" id="liveEventStream">
@@ -359,7 +458,7 @@
                         Identity signal reused from W-OLD. <strong>Collision detected</strong>.
                     </div>
                     <div class="event-badge-cell">
-                        <span class="badge-cyber badge-ambiguous">⚠ AMBIGUOUS</span>
+                        <span class="badge-cyber badge-ambiguous">AMBIGUOUS</span>
                     </div>
                 </div>
                 <div class="event-feed-item denied">
@@ -371,7 +470,7 @@
                         Attempt to <strong>database</strong> blocked. Fail-closed policy active.
                     </div>
                     <div class="event-badge-cell">
-                        <span class="badge-cyber badge-denied">🔒 DENIED</span>
+                        <span class="badge-cyber badge-denied">DENIED</span>
                     </div>
                 </div>
                 <div class="event-feed-item confirmed">
@@ -383,7 +482,7 @@
                         Identity confirmed as <strong>student</strong> via attestation token.
                     </div>
                     <div class="event-badge-cell">
-                        <span class="badge-cyber badge-confirmed">✓ CONFIRMED</span>
+                        <span class="badge-cyber badge-confirmed">CONFIRMED</span>
                     </div>
                 </div>
                 <div class="event-feed-item confirmed">
@@ -395,7 +494,7 @@
                         Retroactive verification completed. <strong>0 violations</strong> found.
                     </div>
                     <div class="event-badge-cell">
-                        <span class="badge-cyber badge-pass">✓ PASS</span>
+                        <span class="badge-cyber badge-pass">PASS</span>
                     </div>
                 </div>
             </div>
@@ -406,10 +505,9 @@
     <div class="cyber-card">
         <div class="card-header-cyber">
             <div class="card-title-cyber">
-                <span>🛰</span>
                 <span>Simulate Traffic</span>
             </div>
-            <a href="/simulator" class="btn-cyber btn-cyber-secondary btn-sm">Full Simulator →</a>
+            <a href="/simulator" class="btn-cyber btn-cyber-secondary btn-sm">Full Simulator</a>
         </div>
         <div class="card-body-cyber">
             <div class="form-group-cyber">
@@ -421,7 +519,7 @@
                 <select id="simDestSelect" class="form-control-cyber"></select>
             </div>
             <button class="btn-cyber btn-cyber-primary" id="btnSimulateTraffic" style="width: 100%;">
-                ⚡ Simulate Request
+                Simulate Request
             </button>
 
             <!-- Result Box -->
@@ -433,4 +531,153 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Fetch NIST Scorecard for Home Banner
+    async function loadHomeScorecard() {
+        try {
+            const resp = await fetch('/api/compliance/scorecard');
+            if (!resp.ok) return;
+            const data = await resp.json();
+            document.getElementById('homeScorecardVal').textContent = `${data.overall_score}%`;
+            document.getElementById('homeDefenseRate').textContent = `${data.metrics.ambiguity_defense_rate_pct}%`;
+            document.getElementById('homeScorecardMaturity').textContent = data.maturity_level.toUpperCase();
+        } catch (e) {
+            console.error('Failed to load home scorecard', e);
+        }
+    }
+
+    // Download audit report
+    document.getElementById('btnHomeDownloadReport').addEventListener('click', async () => {
+        try {
+            const resp = await fetch('/api/compliance/report');
+            const data = await resp.json();
+            const blob = new Blob([data.report], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `seglabel-zero-trust-audit-${new Date().toISOString().slice(0,10)}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (e) {
+            alert('Failed to download audit report: ' + e.message);
+        }
+    });
+
+    // 2. Interactive Attack Buttons on Homepage
+    const attackButtons = document.querySelectorAll('.btn-home-attack');
+    const attackConsole = document.getElementById('homeAttackConsole');
+    const attackConsoleTitle = document.getElementById('homeAttackConsoleTitle');
+    const attackSteps = document.getElementById('homeAttackSteps');
+    const btnDismissConsole = document.getElementById('btnDismissHomeConsole');
+
+    btnDismissConsole.addEventListener('click', () => {
+        attackConsole.style.display = 'none';
+    });
+
+    attackButtons.forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const attackId = btn.getAttribute('data-attack');
+            attackConsole.style.display = 'block';
+            attackConsole.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            attackConsoleTitle.textContent = `Executing Scenario: ${attackId}...`;
+            attackSteps.innerHTML = '<div style="color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.85rem; padding: 0.75rem;"><span class="pulse-dot"></span> Simulating adversarial packet sequence...</div>';
+
+            try {
+                let resp;
+                if (attackId === 'ip_churn') {
+                    resp = await fetch('/api/demo/run', { method: 'POST' });
+                } else {
+                    resp = await fetch(`/api/scenarios/${attackId}/run`, { method: 'POST' });
+                }
+                const res = await resp.json();
+                if (res.error) throw new Error(res.error);
+
+                attackConsoleTitle.textContent = `${res.title || res.demo_name || 'Simulation Completed'}`;
+
+                let stepsHtml = '';
+                (res.steps || []).forEach(step => {
+                    let badgeClass = 'badge-info';
+                    if (step.status_badge === 'CONFIRMED' || step.status_badge === 'ALLOWED' || step.status_badge === 'PASS' || step.status_badge === 'SVID_ISSUED') {
+                        badgeClass = 'badge-active';
+                    } else if (step.status_badge === 'AMBIGUOUS' || step.status_badge === 'STARTING') {
+                        badgeClass = 'badge-ambiguous';
+                    } else if (step.status_badge === 'DENIED' || step.status_badge === 'QUARANTINED' || step.status_badge === 'REVOKED' || step.status_badge === 'FORGERY_BLOCKED') {
+                        badgeClass = 'badge-denied';
+                    }
+
+                    stepsHtml += `
+                    <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.75rem 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                            <span style="font-family: var(--font-heading); font-size: 0.8rem; font-weight: 700; color: var(--accent-blue);">
+                                Step ${step.step}: ${escapeHtml(step.title)}
+                            </span>
+                            <span class="badge-cyber ${badgeClass}" style="font-size: 0.7rem;">
+                                ${escapeHtml(step.status_badge || step.decision || 'INFO')}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.82rem; color: var(--text-primary);">
+                            ${escapeHtml(step.description || '')}
+                        </div>
+                        ${step.reason ? `<div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--status-violation); margin-top: 0.25rem;">Reason: <code>${escapeHtml(step.reason)}</code></div>` : ''}
+                    </div>
+                    `;
+                });
+                attackSteps.innerHTML = stepsHtml;
+
+                // Refresh dashboard stats
+                if (window.fetchDashboardStats) window.fetchDashboardStats();
+                loadHomeScorecard();
+            } catch (err) {
+                attackConsoleTitle.textContent = 'Simulation Error';
+                attackSteps.innerHTML = `<div style="color: var(--status-violation); padding: 0.75rem;">${escapeHtml(err.message)}</div>`;
+            }
+        });
+    });
+
+    // 3. Cloud-Native Policy Exporter on Homepage
+    let activeHomeManifest = '';
+    const homePolicyViewer = document.getElementById('homePolicyCodeViewer');
+    const btnHomeCopy = document.getElementById('btnHomeCopyPolicy');
+    const homeTabs = document.querySelectorAll('.btn-home-tab');
+
+    async function loadHomePolicy(kind) {
+        homePolicyViewer.textContent = 'Loading policy matrix...';
+        try {
+            const resp = await fetch(`/api/export/${kind}`);
+            const data = await resp.json();
+            activeHomeManifest = data.manifest || data.code || '';
+            homePolicyViewer.textContent = activeHomeManifest;
+        } catch (e) {
+            homePolicyViewer.textContent = 'Error loading policy: ' + e.message;
+        }
+    }
+
+    homeTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            homeTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            loadHomePolicy(tab.getAttribute('data-tab'));
+        });
+    });
+
+    btnHomeCopy.addEventListener('click', () => {
+        if (!activeHomeManifest) return;
+        navigator.clipboard.writeText(activeHomeManifest).then(() => {
+            const orig = btnHomeCopy.textContent;
+            btnHomeCopy.textContent = 'Copied!';
+            setTimeout(() => { btnHomeCopy.textContent = orig; }, 2000);
+        });
+    });
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    loadHomeScorecard();
+    loadHomePolicy('cilium');
+});
+</script>
 {% endblock %}

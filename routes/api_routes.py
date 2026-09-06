@@ -30,6 +30,8 @@ def get_stats():
     total_workloads = len(workloads)
     ambiguous_workloads = sum(1 for w in workloads if w.status in ("AMBIGUOUS", "STARTING"))
     confirmed_workloads = sum(1 for w in workloads if w.status == "CONFIRMED")
+    quarantined_workloads = sum(1 for w in workloads if w.status == "QUARANTINED")
+    revoked_workloads = sum(1 for w in workloads if w.status == "REVOKED")
 
     verif_passes = sum(1 for v in verifications if v["result"] == "PASS")
     verif_fails = sum(1 for v in verifications if v["result"] == "FAIL")
@@ -38,6 +40,8 @@ def get_stats():
         "total_workloads": total_workloads,
         "ambiguous_workloads": ambiguous_workloads,
         "confirmed_workloads": confirmed_workloads,
+        "quarantined_workloads": quarantined_workloads,
+        "revoked_workloads": revoked_workloads,
         "communication_attempts": audit_summary["total_requests"],
         "allowed_requests": audit_summary["allowed_requests"],
         "denied_requests": audit_summary["denied_requests"],
@@ -266,3 +270,134 @@ def reset_system():
     db_path = current_app.config["DATABASE_PATH"]
     reset_db(db_path)
     return jsonify({"message": "Database successfully reset to seed defaults."}), 200
+
+@api_bp.route("/workloads/<workload_id>/quarantine", methods=["POST"])
+def quarantine_workload(workload_id: str):
+    identity_mgr, _, _, _, _, _ = get_services()
+    data = request.get_json() or {}
+    reason = data.get("reason", "Administrative quarantine command triggered")
+    try:
+        w = identity_mgr.quarantine_workload(workload_id, reason=reason)
+        return jsonify(w.to_dict()), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+
+@api_bp.route("/workloads/<workload_id>/revoke", methods=["POST"])
+def revoke_workload(workload_id: str):
+    identity_mgr, _, _, _, _, _ = get_services()
+    data = request.get_json() or {}
+    reason = data.get("reason", "Cryptographic revocation / runtime compromise")
+    try:
+        w = identity_mgr.revoke_workload(workload_id, reason=reason)
+        return jsonify(w.to_dict()), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 404
+
+@api_bp.route("/workloads/check-timeouts", methods=["POST"])
+def check_timeouts():
+    identity_mgr, _, _, _, _, _ = get_services()
+    data = request.get_json() or {}
+    ttl = float(data.get("ttl_seconds", 60.0))
+    quarantined = identity_mgr.check_attestation_timeouts(ttl_seconds=ttl)
+    return jsonify({
+        "quarantined_count": len(quarantined),
+        "quarantined": quarantined
+    }), 200
+
+@api_bp.route("/workloads/<workload_id>/spiffe-token", methods=["POST"])
+def issue_spiffe_token(workload_id: str):
+    from services.spiffe_service import SpiffeService
+    identity_mgr, _, _, _, _, _ = get_services()
+    w = identity_mgr.get_workload(workload_id)
+    if not w:
+        return jsonify({"error": f"Workload {workload_id} not found"}), 404
+
+    data = request.get_json() or {}
+    target_identity = data.get("identity", w.initial_identity_signal)
+    ttl = int(data.get("ttl_seconds", 3600))
+
+    spiffe_svc = SpiffeService()
+    token_data = spiffe_svc.issue_svid(workload_id, target_identity, ttl_seconds=ttl)
+    return jsonify(token_data), 200
+
+@api_bp.route("/workloads/<workload_id>/spiffe-attest", methods=["POST"])
+def attest_spiffe_token(workload_id: str):
+    from services.spiffe_service import SpiffeService
+    identity_mgr, _, _, _, verif_svc, _ = get_services()
+    data = request.get_json() or {}
+    token = data.get("token")
+    if not token:
+        return jsonify({"error": "Missing 'token' in request payload"}), 400
+
+    spiffe_svc = SpiffeService()
+    is_valid, claims, reason = spiffe_svc.verify_svid(token)
+    if not is_valid:
+        return jsonify({
+            "error": "SPIFFE SVID verification failed",
+            "reason": reason,
+            "success": False
+        }), 400
+
+    confirmed_id = claims.get("identity")
+    try:
+        updated_workload = identity_mgr.confirm_identity(workload_id, confirmed_id)
+        verification_report = verif_svc.verify_ambiguity_window(workload_id)
+        return jsonify({
+            "workload": updated_workload.to_dict(),
+            "spiffe_claims": claims,
+            "verification": verification_report,
+            "success": True
+        }), 200
+    except ValueError as e:
+        return jsonify({"error": str(e), "success": False}), 409
+
+@api_bp.route("/export/cilium", methods=["GET"])
+def export_cilium():
+    from services.policy_exporter_service import PolicyExporterService
+    db_path = current_app.config["DATABASE_PATH"]
+    exporter = PolicyExporterService(db_path)
+    manifest = exporter.export_cilium_manifest()
+    return jsonify({"format": "yaml", "kind": "CiliumNetworkPolicy", "manifest": manifest}), 200
+
+@api_bp.route("/export/k8s", methods=["GET"])
+def export_k8s():
+    from services.policy_exporter_service import PolicyExporterService
+    db_path = current_app.config["DATABASE_PATH"]
+    exporter = PolicyExporterService(db_path)
+    manifest = exporter.export_k8s_network_policy()
+    return jsonify({"format": "yaml", "kind": "NetworkPolicy", "manifest": manifest}), 200
+
+@api_bp.route("/export/ebpf", methods=["GET"])
+def export_ebpf():
+    from services.policy_exporter_service import PolicyExporterService
+    db_path = current_app.config["DATABASE_PATH"]
+    exporter = PolicyExporterService(db_path)
+    code = exporter.export_ebpf_sock_ops_snippet()
+    return jsonify({"format": "c", "kind": "bpf_sock_ops", "code": code}), 200
+
+@api_bp.route("/compliance/scorecard", methods=["GET"])
+def get_compliance_scorecard():
+    from services.compliance_service import ComplianceService
+    db_path = current_app.config["DATABASE_PATH"]
+    svc = ComplianceService(db_path)
+    scorecard = svc.get_zero_trust_scorecard()
+    return jsonify(scorecard), 200
+
+@api_bp.route("/compliance/report", methods=["GET"])
+def get_compliance_report():
+    from services.compliance_service import ComplianceService
+    db_path = current_app.config["DATABASE_PATH"]
+    svc = ComplianceService(db_path)
+    report_md = svc.generate_markdown_audit_report()
+    return jsonify({"format": "markdown", "report": report_md}), 200
+
+@api_bp.route("/scenarios/<scenario_id>/run", methods=["POST"])
+def run_scenario_route(scenario_id: str):
+    _, _, _, _, _, demo_svc = get_services()
+    try:
+        res = demo_svc.run_scenario(scenario_id)
+        return jsonify(res), 200
+    except ValueError as e:
+        return jsonify({"error": str(e), "success": False}), 404
+    except Exception as e:
+        return jsonify({"error": str(e), "success": False}), 500

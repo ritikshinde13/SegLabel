@@ -5,17 +5,17 @@
 {% block content %}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div>
-        <h1 style="font-size: 1.7rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em;">Security Audit Trail</h1>
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+        <h1 class="page-title">Security Audit Trail</h1>
+        <p class="page-description">
             Immutable telemetry records of every communication attempt and microsegmentation enforcement decision.
         </p>
     </div>
     <div style="display: flex; gap: 0.75rem;">
         <button class="btn-cyber btn-cyber-secondary btn-sm" onclick="exportAuditJson()">
-            ⤓ Export JSON
+            Export JSON
         </button>
         <button class="btn-cyber btn-cyber-secondary btn-sm" onclick="loadAuditTable()">
-            ↺ Refresh Logs
+            Refresh Logs
         </button>
     </div>
 </div>
@@ -24,13 +24,13 @@
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div class="filter-pills-bar" style="margin-bottom: 0;">
         <button class="filter-pill active" onclick="filterAuditLogs('ALL', this)">All Logs</button>
-        <button class="filter-pill" onclick="filterAuditLogs('DENIED', this)">🔒 Denied (Blocked)</button>
-        <button class="filter-pill" onclick="filterAuditLogs('ALLOWED', this)">✓ Allowed</button>
-        <button class="filter-pill" onclick="filterAuditLogs('AMBIGUOUS', this)">⚠ Ambiguity Window</button>
-        <button class="filter-pill" onclick="filterAuditLogs('VIOLATIONS', this)">🚨 Security Violations</button>
+        <button class="filter-pill" onclick="filterAuditLogs('DENIED', this)">Denied (Blocked)</button>
+        <button class="filter-pill" onclick="filterAuditLogs('ALLOWED', this)">Allowed</button>
+        <button class="filter-pill" onclick="filterAuditLogs('AMBIGUOUS', this)">Ambiguity Window</button>
+        <button class="filter-pill" onclick="filterAuditLogs('VIOLATIONS', this)">Security Violations</button>
     </div>
     <div style="min-width: 260px;">
-        <input type="text" id="auditSearchInput" class="form-control-cyber" placeholder="🔍 Search workload, destination, reason..." oninput="filterAuditBySearch(this.value)">
+        <input type="text" id="auditSearchInput" class="form-control-cyber" placeholder="Search workload, destination, reason..." oninput="filterAuditBySearch(this.value)">
     </div>
 </div>
 
@@ -38,7 +38,6 @@
 <div class="cyber-card">
     <div class="card-header-cyber">
         <div class="card-title-cyber">
-            <span>🛡</span>
             <span>Recorded Microsegmentation Events</span>
         </div>
         <span class="badge-cyber badge-starting" id="auditTotalCountBadge">0 EVENTS RECORDED</span>

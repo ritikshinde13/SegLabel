@@ -6,24 +6,24 @@
 <!-- Fleet Header Bar -->
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div>
-        <h1 style="font-size: 1.7rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em;">Workload Fleet Explorer</h1>
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+        <h1 class="page-title">Workload Fleet Explorer</h1>
+        <p class="page-description">
             Inspect managed workloads, monitor active ambiguity windows, and review identity attestations.
         </p>
     </div>
     <div style="display: flex; gap: 0.75rem; align-items: center;">
         <!-- View Switcher -->
-        <div style="display: flex; background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius-sm); padding: 3px;">
-            <button class="btn-cyber btn-sm" id="btnViewCards" style="background: rgba(0, 229, 255, 0.15); color: var(--accent-cyan);" onclick="switchFleetView('cards')">
-                ▦ Cards
+        <div style="display: flex; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 3px;">
+            <button class="btn-cyber btn-sm" id="btnViewCards" style="background: var(--accent-blue); color: #FFFFFF;" onclick="switchFleetView('cards')">
+                Cards
             </button>
             <button class="btn-cyber btn-sm" id="btnViewTable" style="background: transparent; color: var(--text-muted);" onclick="switchFleetView('table')">
-                ▤ Table
+                Table
             </button>
         </div>
 
         <button class="btn-cyber btn-cyber-primary" onclick="openRegisterModal()">
-            + Register Workload
+            Register Workload
         </button>
     </div>
 </div>
@@ -32,12 +32,12 @@
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div class="filter-pills-bar" style="margin-bottom: 0;">
         <button class="filter-pill active" onclick="filterWorkloadFleet('ALL', this)">All Workloads</button>
-        <button class="filter-pill" onclick="filterWorkloadFleet('AMBIGUOUS', this)">⚠ Ambiguous Window</button>
-        <button class="filter-pill" onclick="filterWorkloadFleet('CONFIRMED', this)">✓ Confirmed Fleet</button>
-        <button class="filter-pill" onclick="filterWorkloadFleet('STARTING', this)">⚡ Starting</button>
+        <button class="filter-pill" onclick="filterWorkloadFleet('AMBIGUOUS', this)">Ambiguous Window</button>
+        <button class="filter-pill" onclick="filterWorkloadFleet('CONFIRMED', this)">Confirmed Fleet</button>
+        <button class="filter-pill" onclick="filterWorkloadFleet('STARTING', this)">Starting</button>
     </div>
     <div style="min-width: 260px;">
-        <input type="text" id="workloadSearchInput" class="form-control-cyber" placeholder="🔍 Search workload ID, name, signal..." oninput="searchWorkloadFleet(this.value)">
+        <input type="text" id="workloadSearchInput" class="form-control-cyber" placeholder="Search workload ID, name, signal..." oninput="searchWorkloadFleet(this.value)">
     </div>
 </div>
 
@@ -73,8 +73,6 @@
     </div>
 </div>
 
-<!-- Dedicated Workload Detail Drawer/Modal is in base.html (#workloadDetailModal) -->
-
 <script>
 let currentFleetFilter = 'ALL';
 let currentFleetView = 'cards';
@@ -89,15 +87,15 @@ function switchFleetView(mode) {
     if (mode === 'cards') {
         cardsEl.style.display = 'grid';
         tableEl.style.display = 'none';
-        btnCards.style.background = 'rgba(0, 229, 255, 0.15)';
-        btnCards.style.color = 'var(--accent-cyan)';
+        btnCards.style.background = 'var(--accent-blue)';
+        btnCards.style.color = '#FFFFFF';
         btnTable.style.background = 'transparent';
         btnTable.style.color = 'var(--text-muted)';
     } else {
         cardsEl.style.display = 'none';
         tableEl.style.display = 'block';
-        btnTable.style.background = 'rgba(0, 229, 255, 0.15)';
-        btnTable.style.color = 'var(--accent-cyan)';
+        btnTable.style.background = 'var(--accent-blue)';
+        btnTable.style.color = '#FFFFFF';
         btnCards.style.background = 'transparent';
         btnCards.style.color = 'var(--text-muted)';
     }

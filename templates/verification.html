@@ -6,17 +6,17 @@
 <!-- Page Header -->
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div>
-        <h1 style="font-size: 1.7rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em;">Retroactive Security Verification</h1>
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">
-            Post-attestation cryptographic audit of the ambiguity window [started_at ➔ confirmed_at].
+        <h1 class="page-title">Retroactive Security Verification</h1>
+        <p class="page-description">
+            Post-attestation cryptographic audit of the ambiguity window [started_at → confirmed_at].
         </p>
     </div>
     <div style="display: flex; gap: 0.75rem;">
         <button class="btn-cyber btn-cyber-primary" id="btnExecuteVerification">
-            🛡 Run Verification
+            Run Verification
         </button>
         <button class="btn-cyber btn-cyber-danger" id="btnInjectTamper" title="Inject synthetic breach to demonstrate FAIL detection">
-            ⚠ Inject Synthetic Breach (Test FAIL)
+            Inject Synthetic Breach (Test FAIL)
         </button>
     </div>
 </div>
@@ -29,7 +29,7 @@
             <select id="verifyWorkloadSelect" class="form-control-cyber" style="width: auto; min-width: 240px; font-weight: 600;"></select>
         </div>
         <div style="font-size: 0.82rem; color: var(--text-secondary);">
-            Evaluates invariant: <strong style="color: #FFFFFF;">Allowed During Ambiguity == 0</strong> &amp; <strong style="color: #FFFFFF;">Wrong-Identity Access == 0</strong>
+            Evaluates invariant: <strong style="color: var(--text-primary);">Allowed During Ambiguity == 0</strong> &amp; <strong style="color: var(--text-primary);">Wrong-Identity Access == 0</strong>
         </div>
     </div>
 </div>
@@ -44,13 +44,12 @@
         </svg>
         <div class="gauge-center-content">
             <div class="gauge-percent" id="gaugePercentText">100%</div>
-            <div class="gauge-verdict" id="gaugeVerdictText">VERIFIED ✓</div>
+            <div class="gauge-verdict" id="gaugeVerdictText">VERIFIED</div>
         </div>
     </div>
 
     <!-- Final Result Banner -->
     <div class="verdict-banner-cyber" id="verdictBanner">
-        <span>✓</span>
         <span id="verdictBannerText">VERIFICATION PASSED — No communication was permitted using an unverified identity.</span>
     </div>
 
@@ -85,7 +84,6 @@
     <div class="cyber-card">
         <div class="card-header-cyber">
             <div class="card-title-cyber">
-                <span>📟</span>
                 <span>Verifier Telemetry Terminal</span>
             </div>
         </div>
@@ -100,7 +98,6 @@ Select a workload and click "Run Verification" to audit its ambiguity window log
     <div class="cyber-card">
         <div class="card-header-cyber">
             <div class="card-title-cyber">
-                <span>📜</span>
                 <span>Verification Audit History</span>
             </div>
         </div>

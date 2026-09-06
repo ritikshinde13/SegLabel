@@ -41,15 +41,78 @@ class CommunicationEngine:
         elif workload.confirmed_at and now_iso < workload.confirmed_at:
             in_ambiguity_window = True
 
+        # Check if destination is another workload (Bidirectional Zero Trust)
+        dest_workload = self.identity_mgr.get_workload(destination)
+
         # CORE SECURITY DECISION
-        if in_ambiguity_window:
+        if current_status == IdentityStatus.QUARANTINED.value:
             decision = "DENY"
-            reason = "IDENTITY_AMBIGUOUS"
+            reason = "IDENTITY_QUARANTINED"
             explanation = (
-                f"Workload identity '{identity_at_decision}' is unconfirmed (Status: {current_status}). "
-                f"Zero Trust Fail-Closed Rule enforced: communication MUST be denied by default during ambiguity window."
+                f"Workload '{workload_id}' is QUARANTINED. "
+                f"Reason: {workload.status_reason or 'Security containment active'}. Egress communication prohibited."
             )
-            applicable_policy = "DENY_BY_DEFAULT_AMBIGUITY"
+            applicable_policy = "FAIL_CLOSED_QUARANTINE"
+        elif current_status == IdentityStatus.REVOKED.value:
+            decision = "DENY"
+            reason = "IDENTITY_REVOKED"
+            explanation = (
+                f"Workload '{workload_id}' identity is REVOKED. "
+                f"Reason: {workload.status_reason or 'Runtime compromise detected'}. Egress communication strictly prohibited."
+            )
+            applicable_policy = "FAIL_CLOSED_REVOKED"
+        elif dest_workload and dest_workload.status in (IdentityStatus.STARTING.value, IdentityStatus.AMBIGUOUS.value):
+            # Bidirectional zero trust check
+            decision = "DENY"
+            reason = "DESTINATION_AMBIGUOUS"
+            explanation = (
+                f"Destination workload '{destination}' has unconfirmed identity (Status: {dest_workload.status}). "
+                f"Bidirectional Zero Trust Rule enforced: communication with ambiguous peer endpoints is forbidden."
+            )
+            applicable_policy = "DENY_BY_DEFAULT_DESTINATION_AMBIGUOUS"
+        elif dest_workload and dest_workload.status in (IdentityStatus.QUARANTINED.value, IdentityStatus.REVOKED.value):
+            decision = "DENY"
+            reason = "DESTINATION_UNAVAILABLE"
+            explanation = (
+                f"Destination workload '{destination}' is in {dest_workload.status} state. Communication blocked."
+            )
+            applicable_policy = "DENY_BY_DEFAULT_DESTINATION_UNAVAILABLE"
+        elif in_ambiguity_window:
+            # Check for Hostile Reconnaissance / Burst Probe (Rate Limiter)
+            conn_check = get_db_connection(self.db_path)
+            try:
+                prior_denies = conn_check.execute(
+                    """
+                    SELECT COUNT(*) as cnt FROM communication_requests
+                    WHERE workload_id = ? AND in_ambiguity_window = 1
+                    """,
+                    (workload_id,)
+                ).fetchone()["cnt"]
+            finally:
+                conn_check.close()
+
+            if prior_denies >= 5:
+                # Automated Quarantine trigger
+                self.identity_mgr.quarantine_workload(
+                    workload_id,
+                    reason=f"Automated Hostile Reconnaissance Quarantine: Exceeded {prior_denies} egress probe attempts during ambiguity window."
+                )
+                current_status = IdentityStatus.QUARANTINED.value
+                decision = "DENY"
+                reason = "HOSTILE_RECONNAISSANCE_QUARANTINED"
+                explanation = (
+                    f"Workload '{workload_id}' triggered automated security containment! "
+                    f"Excessive communication probes during identity ambiguity window detected. Workload quarantined."
+                )
+                applicable_policy = "AUTO_QUARANTINE_RECONNAISSANCE"
+            else:
+                decision = "DENY"
+                reason = "IDENTITY_AMBIGUOUS"
+                explanation = (
+                    f"Workload identity '{identity_at_decision}' is unconfirmed (Status: {current_status}). "
+                    f"Zero Trust Fail-Closed Rule enforced: communication MUST be denied by default during ambiguity window."
+                )
+                applicable_policy = "DENY_BY_DEFAULT_AMBIGUITY"
         else:
             # Identity is CONFIRMED - apply normal segmentation policy
             decision, reason, explanation = self.policy_engine.evaluate(

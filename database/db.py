@@ -50,8 +50,20 @@ def init_db(db_path: str, seed_defaults: bool = True) -> None:
 
     conn = get_db_connection(db_path)
     with conn:
-        with open(SCHEMA_FILE, "r") as f:
-            conn.executescript(f.read())
+        cursor = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='workloads'")
+        row = cursor.fetchone()
+        if row and row["sql"] and "QUARANTINED" not in row["sql"]:
+            conn.execute("PRAGMA foreign_keys = OFF;")
+            conn.execute("CREATE TABLE workloads_migration_backup AS SELECT * FROM workloads;")
+            conn.execute("DROP TABLE workloads;")
+            with open(SCHEMA_FILE, "r") as f:
+                conn.executescript(f.read())
+            conn.execute("INSERT OR IGNORE INTO workloads SELECT * FROM workloads_migration_backup;")
+            conn.execute("DROP TABLE workloads_migration_backup;")
+            conn.execute("PRAGMA foreign_keys = ON;")
+        else:
+            with open(SCHEMA_FILE, "r") as f:
+                conn.executescript(f.read())
 
         if seed_defaults:
             # Seed default admin account

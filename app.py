@@ -47,24 +47,15 @@ def create_app(config_class=Config) -> Flask:
 
     return app
 
-def find_free_port(preferred_port: int = 5000) -> int:
-    import socket
-    for p in [preferred_port, 5050, 5001, 8000, 8080]:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            try:
-                s.bind(("127.0.0.1", p))
-                return p
-            except OSError:
-                continue
-    return preferred_port
+DEFAULT_PORT = 5050
 
 if __name__ == "__main__":
     app = create_app()
-    env_port = os.environ.get("PORT")
-    port = int(env_port) if env_port else find_free_port(5000)
+    port = int(os.environ.get("PORT", DEFAULT_PORT))
     print("=" * 60)
-    print(f"SegLabel Microsegmentation Engine is running!")
-    print(f"Local URL: http://127.0.0.1:{port}")
+    print("SegLabel Unified Microsegmentation Command Center")
+    print(f"Single Localhost Server URL: http://localhost:{port}")
+    print(f"All features accessible at:  http://localhost:{port}/")
     print("=" * 60)
     app.run(host="0.0.0.0", port=port, debug=True)
 

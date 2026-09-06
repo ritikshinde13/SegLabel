@@ -5,14 +5,14 @@
 {% block content %}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div>
-        <h1 style="font-size: 1.7rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em;">Identity Events Stream</h1>
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+        <h1 class="page-title">Identity Events Stream</h1>
+        <p class="page-description">
             Chronological audit of workload startup identity signals, collision detections, attestations, and lifecycle state changes.
         </p>
     </div>
     <div>
         <button class="btn-cyber btn-cyber-secondary btn-sm" onclick="loadIdentityEventsPage()">
-            ↺ Refresh Events
+            Refresh Events
         </button>
     </div>
 </div>
@@ -20,16 +20,15 @@
 <!-- Filter Pills -->
 <div class="filter-pills-bar">
     <button class="filter-pill active" onclick="filterIdentityEvents('ALL', this)">All Events</button>
-    <button class="filter-pill" onclick="filterIdentityEvents('COLLISION', this)">⚠ Identity Collisions</button>
-    <button class="filter-pill" onclick="filterIdentityEvents('CONFIRMED', this)">✓ Attestation Confirmations</button>
-    <button class="filter-pill" onclick="filterIdentityEvents('STARTUP', this)">⚡ Startup Signals</button>
+    <button class="filter-pill" onclick="filterIdentityEvents('COLLISION', this)">Identity Collisions</button>
+    <button class="filter-pill" onclick="filterIdentityEvents('CONFIRMED', this)">Attestation Confirmations</button>
+    <button class="filter-pill" onclick="filterIdentityEvents('STARTUP', this)">Startup Signals</button>
 </div>
 
 <!-- Events Timeline Container -->
 <div class="cyber-card">
     <div class="card-header-cyber">
         <div class="card-title-cyber">
-            <span>📡</span>
             <span>Cluster Identity Lifecycle Telemetry</span>
         </div>
         <span class="badge-cyber badge-starting" id="eventsCountBadge">Loading events...</span>

@@ -4,8 +4,8 @@
 
 {% block content %}
 <div style="margin-bottom: 1.5rem;">
-    <h1 style="font-size: 1.7rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em;">Microsegmentation Traffic Monitor</h1>
-    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+    <h1 class="page-title">Microsegmentation Traffic Monitor</h1>
+    <p class="page-description">
         Real-time egress/ingress policy enforcement and interactive communication simulator.
     </p>
 </div>
@@ -14,7 +14,6 @@
 <div class="cyber-card" style="margin-bottom: 2rem;">
     <div class="card-header-cyber">
         <div class="card-title-cyber">
-            <span>⚡</span>
             <span>Live Communication Flow Monitor</span>
         </div>
         <span class="badge-cyber badge-starting">ACTIVE MONITORING</span>
@@ -35,7 +34,7 @@
                 </div>
                 <div class="flow-line-track">
                     <div class="flow-beam-denied"></div>
-                    <div class="flow-status-pill badge-cyber badge-denied">🔒 BLOCKED</div>
+                    <div class="flow-status-pill badge-cyber badge-denied">BLOCKED</div>
                 </div>
                 <div class="flow-dest-node">
                     <strong>DATABASE</strong>
@@ -52,7 +51,7 @@
                 </div>
                 <div class="flow-line-track">
                     <div class="flow-beam-denied"></div>
-                    <div class="flow-status-pill badge-cyber badge-denied">🔒 BLOCKED</div>
+                    <div class="flow-status-pill badge-cyber badge-denied">BLOCKED</div>
                 </div>
                 <div class="flow-dest-node">
                     <strong>PAYMENT API</strong>
@@ -69,7 +68,7 @@
                 </div>
                 <div class="flow-line-track">
                     <div class="flow-beam-allowed"></div>
-                    <div class="flow-status-pill badge-cyber badge-allowed">✓ ALLOWED</div>
+                    <div class="flow-status-pill badge-cyber badge-allowed">ALLOWED</div>
                 </div>
                 <div class="flow-dest-node">
                     <strong>PAYMENT API</strong>
@@ -86,7 +85,6 @@
     <div class="cyber-card">
         <div class="card-header-cyber">
             <div class="card-title-cyber">
-                <span>🛰</span>
                 <span>Simulate Traffic Request</span>
             </div>
         </div>
@@ -113,7 +111,7 @@
             </div>
 
             <button class="btn-cyber btn-cyber-primary" id="btnSimulateTraffic" style="width: 100%; padding: 0.8rem; font-size: 0.95rem;">
-                ⚡ Execute Simulation Request
+                Execute Simulation Request
             </button>
 
             <!-- Quick Security Presets -->
@@ -123,13 +121,13 @@
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 0.4rem;">
                     <button class="btn-cyber btn-cyber-secondary btn-sm" style="justify-content: flex-start; text-align: left;" onclick="setPreset('W-NEW', 'database')">
-                        Preset 1: W-NEW ➔ database (Expect: 🔒 DENY IDENTITY_AMBIGUOUS)
+                        Preset 1: W-NEW → database (Expect: DENY IDENTITY_AMBIGUOUS)
                     </button>
                     <button class="btn-cyber btn-cyber-secondary btn-sm" style="justify-content: flex-start; text-align: left;" onclick="setPreset('W-NEW', 'payment-api')">
-                        Preset 2: W-NEW ➔ payment-api (Expect: 🔒 DENY IDENTITY_AMBIGUOUS)
+                        Preset 2: W-NEW → payment-api (Expect: DENY IDENTITY_AMBIGUOUS)
                     </button>
                     <button class="btn-cyber btn-cyber-secondary btn-sm" style="justify-content: flex-start; text-align: left;" onclick="setPreset('W-OLD', 'payment-api')">
-                        Preset 3: W-OLD ➔ payment-api (Expect: ✓ ALLOW POLICY_ALLOW)
+                        Preset 3: W-OLD → payment-api (Expect: ALLOW POLICY_ALLOW)
                     </button>
                 </div>
             </div>
@@ -140,7 +138,6 @@
     <div class="cyber-card">
         <div class="card-header-cyber">
             <div class="card-title-cyber">
-                <span>🛡</span>
                 <span>Security Decision Breakdown</span>
             </div>
             <span class="badge-cyber badge-starting" id="decisionLiveBadge">LIVE INSPECTION</span>
@@ -161,8 +158,7 @@
 
             <div id="simulationResult">
                 <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: 1.75rem; text-align: center;">
-                    <div style="font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--accent-cyan);">◈</div>
-                    <h3 style="font-size: 1.1rem; color: #FFFFFF; margin-bottom: 0.4rem;">Awaiting Traffic Simulation</h3>
+                    <h3 style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 0.4rem;">Awaiting Traffic Simulation</h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 320px; margin: 0 auto;">
                         Select a source workload and destination endpoint to inspect real-time microsegmentation policy evaluation.
                     </p>
@@ -190,7 +186,7 @@
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    font-family: var(--font-mono);
+    font-family: var(--font-heading);
 }
 
 .flow-dest-node {
@@ -203,7 +199,7 @@
 .flow-line-track {
     position: relative;
     height: 2px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--border-subtle);
     margin: 0 1.5rem;
     display: flex;
     align-items: center;
@@ -217,7 +213,6 @@
     height: 100%;
     width: 60%;
     background: linear-gradient(90deg, var(--status-ambiguous), var(--status-violation));
-    box-shadow: 0 0 10px var(--status-violation);
 }
 
 .flow-beam-allowed {
@@ -226,14 +221,13 @@
     left: 0;
     height: 100%;
     width: 100%;
-    background: linear-gradient(90deg, var(--status-confirmed), var(--accent-cyan));
-    box-shadow: 0 0 10px var(--status-confirmed);
+    background: linear-gradient(90deg, var(--status-confirmed), var(--accent-blue));
 }
 
 .flow-status-pill {
     position: relative;
     z-index: 2;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 </style>
 {% endblock %}

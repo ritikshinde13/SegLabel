@@ -194,3 +194,213 @@ class DemoService:
             "steps": steps_trace,
             "final_verification": verification
         }
+
+    def run_scenario_reconnaissance_burst(self) -> Dict[str, Any]:
+        """Scenario: Attacker launches aggressive port-scan probe burst during startup -> triggers automated quarantine."""
+        from services.spiffe_service import SpiffeService
+        steps: List[Dict[str, Any]] = []
+
+        # Cleanup test workload
+        conn = get_db_connection(self.db_path)
+        with conn:
+            conn.execute("DELETE FROM verification_results WHERE workload_id = 'W-RECON-ATTACKER'")
+            conn.execute("DELETE FROM audit_logs WHERE workload_id = 'W-RECON-ATTACKER'")
+            conn.execute("DELETE FROM communication_requests WHERE workload_id = 'W-RECON-ATTACKER'")
+            conn.execute("DELETE FROM identity_events WHERE workload_id = 'W-RECON-ATTACKER'")
+            conn.execute("DELETE FROM workloads WHERE id = 'W-RECON-ATTACKER'")
+        conn.close()
+
+        # Step 1: Rogue container boots claiming admin identity
+        w = self.identity_mgr.create_workload(
+            workload_id="W-RECON-ATTACKER",
+            name="Rogue Ingress Container",
+            initial_identity_signal="admin",
+            status=IdentityStatus.STARTING.value
+        )
+        steps.append({
+            "step": 1,
+            "title": "Rogue Container Starts",
+            "description": "Container started claiming 'admin' identity. Status: STARTING (Fail-Closed).",
+            "status_badge": "STARTING",
+            "workload_id": "W-RECON-ATTACKER"
+        })
+
+        # Step 2: Fires 5 rapid probe requests to diverse internal endpoints
+        probed = ["database", "payment-api", "student-api", "admin-api", "analytics-service"]
+        for idx, dest in enumerate(probed, start=1):
+            res = self.comm_engine.simulate_request("W-RECON-ATTACKER", dest)
+            steps.append({
+                "step": 1 + idx,
+                "title": f"Probe Attempt #{idx}: Egress to {dest}",
+                "description": f"Attempt to connect to {dest}. Blocked by Zero Trust rule: {res['reason']}.",
+                "decision": res["decision"],
+                "reason": res["reason"],
+                "status_badge": "DENIED"
+            })
+
+        # Step 3: 6th request triggers automated hostile reconnaissance threshold and QUARANTINE
+        burst_req = self.comm_engine.simulate_request("W-RECON-ATTACKER", "database")
+        w_after = self.identity_mgr.get_workload("W-RECON-ATTACKER")
+        steps.append({
+            "step": 7,
+            "title": "Rate Limit Threshold Exceeded -> Automated Quarantine",
+            "description": f"Excessive probe attempts detected. Workload automatically isolated into {w_after.status}. Reason: {burst_req['reason']}.",
+            "decision": burst_req["decision"],
+            "reason": burst_req["reason"],
+            "status_badge": "QUARANTINED"
+        })
+
+        return {
+            "success": True,
+            "scenario_id": "reconnaissance_burst",
+            "title": "Hostile Ambiguity Reconnaissance & Automated Containment",
+            "executed_at": datetime.now(timezone.utc).isoformat(),
+            "steps": steps
+        }
+
+    def run_scenario_spiffe_forgery(self) -> Dict[str, Any]:
+        """Scenario: Attacker presents a cryptographically forged SPIFFE JWT SVID token."""
+        from services.spiffe_service import SpiffeService
+        spiffe = SpiffeService()
+        steps: List[Dict[str, Any]] = []
+
+        conn = get_db_connection(self.db_path)
+        with conn:
+            conn.execute("DELETE FROM workloads WHERE id = 'W-SVID-FORGER'")
+            conn.execute("DELETE FROM identity_events WHERE workload_id = 'W-SVID-FORGER'")
+            conn.execute("DELETE FROM communication_requests WHERE workload_id = 'W-SVID-FORGER'")
+            conn.execute("DELETE FROM audit_logs WHERE workload_id = 'W-SVID-FORGER'")
+        conn.close()
+
+        # Step 1: Workload starts
+        w = self.identity_mgr.create_workload("W-SVID-FORGER", "Cryptographic Probe Pod", "untrusted-worker")
+        steps.append({
+            "step": 1,
+            "title": "Workload Bootstrapping",
+            "description": "Workload started with unconfirmed signal 'untrusted-worker'. Status: STARTING.",
+            "status_badge": "STARTING"
+        })
+
+        # Step 2: Attacker generates a legitimate SVID for 'student'
+        legit_svid = spiffe.issue_svid("W-SVID-FORGER", "student")
+        steps.append({
+            "step": 2,
+            "title": "SPIFFE SVID Minted",
+            "description": f"SPIRE issued legitimate SVID: {legit_svid['spiffe_id']} signed by HMAC-SHA256.",
+            "status_badge": "SVID_ISSUED",
+            "token_preview": legit_svid["token"][:35] + "..."
+        })
+
+        # Step 3: Attacker tampers with token payload to claim 'admin'
+        tampered_token = legit_svid["token"][:-6] + "BADSIG"
+        is_valid, claims, err = spiffe.verify_svid(tampered_token)
+        steps.append({
+            "step": 3,
+            "title": "Cryptographic Verification of Forged SVID",
+            "description": f"Attacker presented forged/tampered SVID token. Verification verdict: {err}.",
+            "status_badge": "FORGERY_BLOCKED",
+            "error": err
+        })
+
+        # Step 4: Verification of original untampered token passes
+        is_valid_real, claims_real, _ = spiffe.verify_svid(legit_svid["token"])
+        assert is_valid_real is True
+        self.identity_mgr.confirm_identity("W-SVID-FORGER", claims_real["identity"])
+        steps.append({
+            "step": 4,
+            "title": "Valid SVID Attestation Succeeds",
+            "description": f"Authentic cryptographic token accepted. Workload safely attested as '{claims_real['identity']}'. Ambiguity window closed.",
+            "status_badge": "CONFIRMED"
+        })
+
+        return {
+            "success": True,
+            "scenario_id": "spiffe_forgery",
+            "title": "Cryptographic SPIFFE SVID Token Tampering & Verification",
+            "executed_at": datetime.now(timezone.utc).isoformat(),
+            "steps": steps
+        }
+
+    def run_scenario_runtime_drift(self) -> Dict[str, Any]:
+        """Scenario: Workload is confirmed, but runtime scanner detects container exploit -> identity is REVOKED."""
+        steps: List[Dict[str, Any]] = []
+
+        conn = get_db_connection(self.db_path)
+        with conn:
+            conn.execute("DELETE FROM workloads WHERE id = 'W-DRIFT-TARGET'")
+            conn.execute("DELETE FROM identity_events WHERE workload_id = 'W-DRIFT-TARGET'")
+            conn.execute("DELETE FROM communication_requests WHERE workload_id = 'W-DRIFT-TARGET'")
+            conn.execute("DELETE FROM audit_logs WHERE workload_id = 'W-DRIFT-TARGET'")
+        conn.close()
+
+        # Step 1: Create confirmed payment workload
+        w = self.identity_mgr.create_workload(
+            "W-DRIFT-TARGET", "Critical Payment Pod", "payment",
+            status=IdentityStatus.CONFIRMED.value, confirmed_identity="payment"
+        )
+        steps.append({
+            "step": 1,
+            "title": "Normal Operation: Workload Confirmed",
+            "description": "Payment worker operational with confirmed identity 'payment'.",
+            "status_badge": "CONFIRMED"
+        })
+
+        # Step 2: Normal allowed request
+        req1 = self.comm_engine.simulate_request("W-DRIFT-TARGET", "payment-api")
+        assert req1["decision"] == "ALLOW"
+        steps.append({
+            "step": 2,
+            "title": "Valid Request: W-DRIFT-TARGET -> payment-api",
+            "description": f"Legitimate traffic allowed: {req1['applicable_policy']}.",
+            "decision": req1["decision"],
+            "reason": req1["reason"],
+            "status_badge": "ALLOWED"
+        })
+
+        # Step 3: Runtime anomaly detected (Falco rule: shell spawned in container) -> Revocation triggered
+        self.identity_mgr.revoke_workload(
+            "W-DRIFT-TARGET",
+            reason="Runtime Anomaly: CVE-2026-RCE exploit detected by kernel security probe."
+        )
+        w_revoked = self.identity_mgr.get_workload("W-DRIFT-TARGET")
+        steps.append({
+            "step": 3,
+            "title": "Runtime Exploit Detected -> Identity Revoked",
+            "description": f"Kernel agent flagged container exploit. Workload state transitioned to {w_revoked.status}.",
+            "status_badge": "REVOKED"
+        })
+
+        # Step 4: Subsequent request fails closed
+        req2 = self.comm_engine.simulate_request("W-DRIFT-TARGET", "payment-api")
+        assert req2["decision"] == "DENY"
+        assert req2["reason"] == "IDENTITY_REVOKED"
+        steps.append({
+            "step": 4,
+            "title": "Post-Revocation Attempt: Immediate Fail-Closed Block",
+            "description": f"Attempted egress blocked: {req2['explanation']}",
+            "decision": req2["decision"],
+            "reason": req2["reason"],
+            "status_badge": "DENIED"
+        })
+
+        return {
+            "success": True,
+            "scenario_id": "runtime_drift",
+            "title": "Post-Attestation Runtime Drift & Immediate Revocation",
+            "executed_at": datetime.now(timezone.utc).isoformat(),
+            "steps": steps
+        }
+
+    def run_scenario(self, scenario_id: str) -> Dict[str, Any]:
+        """Dispatcher for all attack scenarios."""
+        clean_id = scenario_id.lower().strip()
+        if clean_id in ("demo", "ip_churn", "1"):
+            return self.run_security_demo()
+        elif clean_id in ("reconnaissance", "burst", "reconnaissance_burst", "2"):
+            return self.run_scenario_reconnaissance_burst()
+        elif clean_id in ("spiffe", "forgery", "spiffe_forgery", "3"):
+            return self.run_scenario_spiffe_forgery()
+        elif clean_id in ("runtime_drift", "revocation", "drift", "4"):
+            return self.run_scenario_runtime_drift()
+        else:
+            raise ValueError(f"Unknown scenario ID: {scenario_id}")

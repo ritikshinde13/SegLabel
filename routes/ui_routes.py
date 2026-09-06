@@ -43,3 +43,11 @@ def policies_page():
 def events_page():
     return render_template("events.html")
 
+@ui_bp.route("/attacks")
+def attacks_page():
+    return render_template("attacks.html")
+
+@ui_bp.route("/compliance")
+def compliance_page():
+    return render_template("compliance.html")
+

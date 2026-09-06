@@ -173,6 +173,20 @@ class IdentityManager:
         if not workload:
             raise ValueError(f"Workload {workload_id} not found")
 
+        # Immutability check
+        if workload.status == IdentityStatus.CONFIRMED.value:
+            if workload.confirmed_identity and workload.confirmed_identity != confirmed_identity:
+                raise ValueError(
+                    f"Workload identity is cryptographically immutable once confirmed. "
+                    f"Existing: '{workload.confirmed_identity}', Requested: '{confirmed_identity}'"
+                )
+            return workload
+
+        if workload.status in (IdentityStatus.QUARANTINED.value, IdentityStatus.REVOKED.value):
+            raise ValueError(
+                f"Cannot confirm workload {workload_id} in {workload.status} state. Workload must be re-provisioned."
+            )
+
         now_iso = datetime.now(timezone.utc).isoformat()
         old_status = workload.status
 
@@ -219,6 +233,106 @@ class IdentityManager:
             return self.get_workload(workload_id)
         finally:
             conn.close()
+
+    def quarantine_workload(self, workload_id: str, reason: str = "Administrative or security quarantine") -> Workload:
+        workload = self.get_workload(workload_id)
+        if not workload:
+            raise ValueError(f"Workload {workload_id} not found")
+        
+        now_iso = datetime.now(timezone.utc).isoformat()
+        old_status = workload.status
+
+        conn = get_db_connection(self.db_path)
+        try:
+            with conn:
+                conn.execute(
+                    """
+                    UPDATE workloads
+                    SET status = ?,
+                        status_reason = ?
+                    WHERE id = ?
+                    """,
+                    (IdentityStatus.QUARANTINED.value, reason, workload_id)
+                )
+                conn.execute(
+                    """
+                    INSERT INTO identity_events (
+                        workload_id, event_type, old_status, new_status, identity_signal, details, timestamp
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        workload_id,
+                        "WORKLOAD_QUARANTINED",
+                        old_status,
+                        IdentityStatus.QUARANTINED.value,
+                        workload.current_identity,
+                        reason,
+                        now_iso
+                    )
+                )
+            return self.get_workload(workload_id)
+        finally:
+            conn.close()
+
+    def revoke_workload(self, workload_id: str, reason: str = "Cryptographic identity revoked / runtime compromise detected") -> Workload:
+        workload = self.get_workload(workload_id)
+        if not workload:
+            raise ValueError(f"Workload {workload_id} not found")
+        
+        now_iso = datetime.now(timezone.utc).isoformat()
+        old_status = workload.status
+
+        conn = get_db_connection(self.db_path)
+        try:
+            with conn:
+                conn.execute(
+                    """
+                    UPDATE workloads
+                    SET status = ?,
+                        status_reason = ?
+                    WHERE id = ?
+                    """,
+                    (IdentityStatus.REVOKED.value, reason, workload_id)
+                )
+                conn.execute(
+                    """
+                    INSERT INTO identity_events (
+                        workload_id, event_type, old_status, new_status, identity_signal, details, timestamp
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        workload_id,
+                        "WORKLOAD_REVOKED",
+                        old_status,
+                        IdentityStatus.REVOKED.value,
+                        workload.current_identity,
+                        reason,
+                        now_iso
+                    )
+                )
+            return self.get_workload(workload_id)
+        finally:
+            conn.close()
+
+    def check_attestation_timeouts(self, ttl_seconds: float = 60.0) -> List[Dict[str, Any]]:
+        """Scans active workloads and quarantines any starting/ambiguous workloads that exceeded attestation TTL."""
+        now = datetime.now(timezone.utc)
+        quarantined = []
+        workloads = self.list_workloads()
+        for w in workloads:
+            if w.status in (IdentityStatus.STARTING.value, IdentityStatus.AMBIGUOUS.value):
+                try:
+                    started_dt = datetime.fromisoformat(w.started_at)
+                    if started_dt.tzinfo is None:
+                        started_dt = started_dt.replace(tzinfo=timezone.utc)
+                    elapsed = (now - started_dt).total_seconds()
+                    if elapsed > ttl_seconds:
+                        reason = f"Attestation TTL expired: pending for {elapsed:.1f}s (limit: {ttl_seconds}s)"
+                        self.quarantine_workload(w.id, reason=reason)
+                        quarantined.append({"workload_id": w.id, "elapsed_seconds": elapsed, "reason": reason})
+                except Exception:
+                    pass
+        return quarantined
 
     def get_identity_events(self, workload_id: str) -> List[IdentityEvent]:
         conn = get_db_connection(self.db_path)

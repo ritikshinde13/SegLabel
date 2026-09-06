@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}SegLabel — Attack Scenario Playground & Threat Simulation{% endblock %}
+{% block breadcrumb %}Attack Scenario Playground{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Attack Scenario Playground</h1>
+            <p class="page-description">
+                Interactive adversary simulation platform. Test how SegLabel's Zero Trust policy engine and mathematical verifier eliminate startup attack vectors, container escapes, and cryptographic forgeries.
+            </p>
+        </div>
+        <div>
+            <span class="badge-cyber badge-active">4 LIVE THREAT SCENARIOS</span>
+        </div>
+    </div>
+
+    <!-- Scenarios Grid -->
+    <div class="grid-2col" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Scenario 1 -->
+        <div class="card-cyber" style="border-left: 4px solid var(--accent-blue); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                    <span class="badge-cyber badge-info">V1: POD CHURN</span>
+                    <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">LATERAL MOVEMENT</span>
+                </div>
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
+                    Identity Recycling Collision
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem;">
+                    A new unconfirmed worker <code>W-NEW</code> starts and claims the privileged <code>payment</code> identity of a pre-existing pod. SegLabel blocks all access during the window until attested as <code>student</code>.
+                </p>
+                <div style="font-family: var(--font-mono); font-size: 0.75rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 1rem;">
+                    <span style="color: var(--accent-blue);">Target Vector:</span> Egress to <code>database</code> & <code>payment-api</code><br>
+                    <span style="color: var(--status-confirmed);">Defense:</span> Fail-Closed Deny + Retroactive Audit
+                </div>
+            </div>
+            <button class="btn-cyber btn-cyber-primary btn-run-scenario" data-scenario="ip_churn" style="width: 100%;">
+                Execute Scenario 1
+            </button>
+        </div>
+
+        <!-- Scenario 2 -->
+        <div class="card-cyber" style="border-left: 4px solid var(--status-ambiguous); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                    <span class="badge-cyber badge-ambiguous">V2: RECON PROBE</span>
+                    <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">AUTO-CONTAINMENT</span>
+                </div>
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
+                    Hostile Reconnaissance Burst
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem;">
+                    A rogue container boots claiming <code>admin</code> and fires 6 rapid port-scanning probes across internal services. SegLabel detects the burst probe and automatically quarantines the workload.
+                </p>
+                <div style="font-family: var(--font-mono); font-size: 0.75rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 1rem;">
+                    <span style="color: var(--status-ambiguous);">Target Vector:</span> 6x internal endpoints port scan<br>
+                    <span style="color: var(--status-confirmed);">Defense:</span> Sliding-Window Rate Limiter & Auto-Quarantine
+                </div>
+            </div>
+            <button class="btn-cyber btn-cyber-primary btn-run-scenario" data-scenario="reconnaissance_burst" style="width: 100%;">
+                Execute Scenario 2
+            </button>
+        </div>
+
+        <!-- Scenario 3 -->
+        <div class="card-cyber" style="border-left: 4px solid #8B5CF6; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                    <span class="badge-cyber" style="background: rgba(139, 92, 246, 0.1); color: #7C3AED; border: 1px solid rgba(139, 92, 246, 0.3);">V3: CRYPTO SPOOF</span>
+                    <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">SPIFFE / SPIRE</span>
+                </div>
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
+                    Cryptographic SVID Forgery
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem;">
+                    An adversary captures a SPIFFE JWT SVID token and tampers with the payload claims to elevate identity to <code>admin</code>. HMAC-SHA256 signature verification detects token tampering.
+                </p>
+                <div style="font-family: var(--font-mono); font-size: 0.75rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 1rem;">
+                    <span style="color: #7C3AED;">Target Vector:</span> Forged SPIFFE JWT token signature<br>
+                    <span style="color: var(--status-confirmed);">Defense:</span> Constant-Time Cryptographic SVID Validation
+                </div>
+            </div>
+            <button class="btn-cyber btn-cyber-primary btn-run-scenario" data-scenario="spiffe_forgery" style="width: 100%;">
+                Execute Scenario 3
+            </button>
+        </div>
+
+        <!-- Scenario 4 -->
+        <div class="card-cyber" style="border-left: 4px solid var(--status-violation); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                    <span class="badge-cyber badge-denied">V4: RUNTIME DRIFT</span>
+                    <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">RUNTIME CONTAINMENT</span>
+                </div>
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
+                    Runtime Compromise & Revocation
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem;">
+                    A confirmed payment workload experiences an active container exploit (CVE RCE). Runtime defense immediately revokes its cryptographic identity, cutting off all active network permissions.
+                </p>
+                <div style="font-family: var(--font-mono); font-size: 0.75rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 1rem;">
+                    <span style="color: var(--status-violation);">Target Vector:</span> Post-attestation container escape<br>
+                    <span style="color: var(--status-confirmed);">Defense:</span> Dynamic Revocation (`REVOKED`) + Instant Severance
+                </div>
+            </div>
+            <button class="btn-cyber btn-cyber-primary btn-run-scenario" data-scenario="runtime_drift" style="width: 100%;">
+                Execute Scenario 4
+            </button>
+        </div>
+    </div>
+
+    <!-- Live Execution Console -->
+    <div class="card-cyber" id="scenarioConsoleSection" style="display: none; margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <div>
+                <span class="badge-cyber badge-active" id="activeScenarioBadge">EXECUTING THREAT SIMULATION</span>
+                <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary); margin-top: 0.35rem;" id="activeScenarioTitle">
+                    Scenario Execution Log
+                </h2>
+            </div>
+            <button class="btn-cyber btn-cyber-secondary btn-sm" id="btnCloseConsole">
+                Dismiss
+            </button>
+        </div>
+
+        <div id="scenarioStepsContainer" style="display: flex; flex-direction: column; gap: 1rem;">
+            <!-- Rendered dynamically -->
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const buttons = document.querySelectorAll('.btn-run-scenario');
+    const consoleSection = document.getElementById('scenarioConsoleSection');
+    const activeTitle = document.getElementById('activeScenarioTitle');
+    const activeBadge = document.getElementById('activeScenarioBadge');
+    const stepsContainer = document.getElementById('scenarioStepsContainer');
+    const btnClose = document.getElementById('btnCloseConsole');
+
+    btnClose.addEventListener('click', () => {
+        consoleSection.style.display = 'none';
+    });
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const scenarioId = btn.getAttribute('data-scenario');
+            btn.disabled = true;
+            const originalText = btn.textContent;
+            btn.textContent = 'Simulating Attack...';
+
+            consoleSection.style.display = 'block';
+            consoleSection.scrollIntoView({ behavior: 'smooth' });
+            activeTitle.textContent = `Running Scenario: ${scenarioId}...`;
+            stepsContainer.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-secondary);"><span class="pulse-dot"></span> Orchestrating attack vector against policy engine...</div>';
+
+            try {
+                let res;
+                if (scenarioId === 'ip_churn') {
+                    const resp = await fetch('/api/demo/run', { method: 'POST' });
+                    res = await resp.json();
+                } else {
+                    const resp = await fetch(`/api/scenarios/${scenarioId}/run`, { method: 'POST' });
+                    res = await resp.json();
+                }
+
+                if (res.error) {
+                    throw new Error(res.error);
+                }
+
+                activeTitle.textContent = res.title || res.demo_name || 'Scenario Completed';
+                activeBadge.textContent = 'SIMULATION COMPLETE';
+                activeBadge.className = 'badge-cyber badge-active';
+
+                // Render steps
+                let html = '';
+                (res.steps || []).forEach(step => {
+                    let badgeClass = 'badge-info';
+                    if (step.status_badge === 'CONFIRMED' || step.status_badge === 'ALLOWED' || step.status_badge === 'PASS' || step.status_badge === 'SVID_ISSUED') {
+                        badgeClass = 'badge-active';
+                    } else if (step.status_badge === 'AMBIGUOUS' || step.status_badge === 'STARTING') {
+                        badgeClass = 'badge-ambiguous';
+                    } else if (step.status_badge === 'DENIED' || step.status_badge === 'QUARANTINED' || step.status_badge === 'REVOKED' || step.status_badge === 'FORGERY_BLOCKED') {
+                        badgeClass = 'badge-denied';
+                    }
+
+                    html += `
+                    <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1.25rem; font-family: var(--font-sans);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="font-family: var(--font-heading); font-size: 0.8rem; font-weight: 700; color: var(--accent-blue);">
+                                STEP ${step.step}: ${escapeHtml(step.title)}
+                            </span>
+                            <span class="badge-cyber ${badgeClass}">
+                                ${escapeHtml(step.status_badge || step.decision || 'INFO')}
+                            </span>
+                        </div>
+                        <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.5rem;">
+                            ${escapeHtml(step.description || '')}
+                        </p>
+                        ${step.reason ? `<div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--status-violation); margin-top: 0.35rem;">Reason: <code>${escapeHtml(step.reason)}</code></div>` : ''}
+                        ${step.token_preview ? `<div style="font-family: var(--font-mono); font-size: 0.75rem; color: #7C3AED; margin-top: 0.35rem;">Token: <code>${escapeHtml(step.token_preview)}</code></div>` : ''}
+                    </div>
+                    `;
+                });
+
+                stepsContainer.innerHTML = html;
+            } catch (err) {
+                activeBadge.textContent = 'SIMULATION FAILED';
+                activeBadge.className = 'badge-cyber badge-denied';
+                stepsContainer.innerHTML = `<div style="padding: 1.5rem; color: var(--status-violation);">Error executing scenario: ${escapeHtml(err.message)}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        });
+    });
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+});
+</script>
+{% endblock %}
