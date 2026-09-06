@@ -45,6 +45,24 @@ def create_app(config_class=Config) -> Flask:
         target = request.full_path if request.query_string else request.path
         return redirect(url_for("auth.login", next=target))
 
+    @app.after_request
+    def add_security_headers(response):
+        """Inject strict OWASP Defense-in-Depth HTTP Security Headers."""
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data:; "
+            "connect-src 'self';"
+        )
+        return response
+
     return app
 
 DEFAULT_PORT = 5050
@@ -52,10 +70,11 @@ DEFAULT_PORT = 5050
 if __name__ == "__main__":
     app = create_app()
     port = int(os.environ.get("PORT", DEFAULT_PORT))
+    debug_mode = os.environ.get("FLASK_DEBUG", "0").lower() in ("1", "true")
     print("=" * 60)
     print("SegLabel Unified Microsegmentation Command Center")
     print(f"Single Localhost Server URL: http://localhost:{port}")
     print(f"All features accessible at:  http://localhost:{port}/")
+    print(f"Security Mode: OWASP Hardened (Debug: {debug_mode})")
     print("=" * 60)
-    app.run(host="0.0.0.0", port=port, debug=True)
-
+    app.run(host="0.0.0.0", port=port, debug=debug_mode)
