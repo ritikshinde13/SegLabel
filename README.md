@@ -182,20 +182,36 @@ pip install -r requirements.txt
 
 ---
 
-## 9. Running the Application
+## 9. Running the Application (Unified Single Localhost Server)
+
+SegLabel runs as a **single, unified server on one port** (`5050`). Every feature, UI page, and REST API operates under this single server:
 
 ```bash
 # Activate virtual environment
 source .venv/bin/activate
 
-# Start Flask application
+# Start the unified Flask application
 python app.py
 ```
 
 Open your browser and navigate to:
 ```text
-http://127.0.0.1:5000
+http://localhost:5050
 ```
+
+### 🌐 Unified Localhost Navigation Map (Port 5050)
+
+All features are accessible from the same origin and port:
+* **Command Center & 3D Topology**: [http://localhost:5050/](http://localhost:5050/)
+* **Workload & Server Inventory**: [http://localhost:5050/workloads](http://localhost:5050/workloads)
+* **Zero-Trust Traffic Simulator**: [http://localhost:5050/simulator](http://localhost:5050/simulator)
+* **Security Policies Matrix**: [http://localhost:5050/policies](http://localhost:5050/policies)
+* **Forensics & Audit Log**: [http://localhost:5050/audit](http://localhost:5050/audit)
+* **Retroactive Verification Engine**: [http://localhost:5050/verification](http://localhost:5050/verification)
+* **Identity Lifecycle Events**: [http://localhost:5050/events](http://localhost:5050/events)
+* **Threat Matrix & Attack Lab**: [http://localhost:5050/attacks](http://localhost:5050/attacks)
+* **NIST SP 800-207 Compliance**: [http://localhost:5050/compliance](http://localhost:5050/compliance)
+* **REST APIs**: `http://localhost:5050/api/...`
 
 Unauthenticated requests will automatically be routed to the **Secure Access Login Portal** (`/login`).
 
@@ -239,7 +255,7 @@ python -m pytest -v
 Click the prominent **"▶ Run Security Demo"** button on the dashboard or execute via cURL:
 
 ```bash
-curl -X POST http://127.0.0.1:5000/api/demo/run
+curl -X POST http://localhost:5050/api/demo/run
 ```
 
 ### Automated 8-Step Flow:
