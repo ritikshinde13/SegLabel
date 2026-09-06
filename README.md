@@ -2,6 +2,11 @@
 
 > A Zero Trust Microsegmentation Engine that protects workloads during startup by eliminating the **Identity Ambiguity Window**, enforcing **Fail-Closed Default Deny**, and executing **Retroactive Cryptographic Verification**.
 
+> [!IMPORTANT]
+> **Single Unified Localhost Server**: The entire SegLabel application runs on **exactly one port**:
+> 🌐 **http://localhost:5050**
+> Every module (3D Topology Command Center, Workloads, Policies, Traffic Simulator, Forensics, Audit, SPIFFE Attestation, Attack Lab, and Compliance) is served from this single localhost endpoint with one command: `python app.py`.
+
 ---
 
 ## 1. Project Overview
